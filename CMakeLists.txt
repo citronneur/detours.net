@@ -20,6 +20,9 @@ if (${DETOURSNET_BUILD_TESTS})
     enable_testing()
 endif()
 
+#SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+#SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+
 # Tree processing
 
 add_subdirectory(detours.net)
