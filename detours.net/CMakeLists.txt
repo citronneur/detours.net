@@ -2,5 +2,5 @@
 
 add_subdirectory(pivot)
 add_subdirectory(loader)
-add_subdirectory(sandbox)
+add_subdirectory(dnsandbox)
 
