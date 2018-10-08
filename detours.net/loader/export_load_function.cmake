@@ -1,10 +1,10 @@
 cmake_policy(SET CMP0012 NEW)
 
 
-set(IL_FILE_PATCH "${CMAKE_CURRENT_BINARY_DIR}/Debug/detoursnet.patch.il")
+set(IL_FILE_PATCH "${CMAKE_CURRENT_BINARY_DIR}/detoursnet.patch.il")
 
 message(STATUS "Patch intermediate language")
-file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/Debug/detoursnet_initial.il" IL_FILE_CONTENTS)
+file(STRINGS "${CMAKE_CURRENT_BINARY_DIR}/detoursnet_initial.il" IL_FILE_CONTENTS)
 file(WRITE ${IL_FILE_PATCH} "")
 foreach(LINE ${IL_FILE_CONTENTS})
 	if(${LINE} MATCHES "^.corflags 0x00000001 *")
