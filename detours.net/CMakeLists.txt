@@ -1,6 +1,7 @@
 # Tree processing
 
-add_subdirectory(pivot)
-add_subdirectory(loader)
-add_subdirectory(dnsandbox)
+add_subdirectory(DetoursNet)
+add_subdirectory(DetoursNetPivot)
+add_subdirectory(DetoursNetLoader)
+add_subdirectory(DetoursNetRuntime)
 

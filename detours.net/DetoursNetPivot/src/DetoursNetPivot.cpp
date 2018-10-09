@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include "detours.h"
 
-extern "C" int Load();
+extern "C" int DetoursNetLoader_Start();
 
 // With detours inject mechanism we need an export
 // Detours rewrite import table with target DLL as first entry
@@ -12,6 +12,6 @@ __declspec(dllexport) void Dummy()
 }
 
 BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved) {
-	Load();
-	return TRUE;
+	DetoursNetLoader_Start();
+	return TRUE; 
 }
