@@ -21,3 +21,8 @@ add_library(Detours STATIC IMPORTED GLOBAL)
 add_dependencies(Detours Detours_project)
 set_target_properties(Detours PROPERTIES IMPORTED_LOCATION ${DETOURS_LIB_DIR}/detours.lib)
 target_include_directories(Detours INTERFACE ${DETOURS_INCLUDE_DIR})
+
+add_custom_target(DetoursDll
+	DEPENDS Detours
+	COMMAND link /dll /machine:x64 /NXCOMPAT /DYNAMICBASE /NOENTRY /def:${CMAKE_CURRENT_SOURCE_DIR}/Detours.def /OUT:${LIBRARY_OUTPUT_PATH}/Debug/Detours.dll ${DETOURS_LIB_DIR}/detours.lib kernel32.lib msvcrt.lib vcruntime.lib ucrt.lib
+)
