@@ -6,10 +6,13 @@ namespace tracecreatefile
 {
     public class TraceCreateFile
     {
-        [detoursnet.DetoursNet("kernel32", "GetModuleHandle")]
-        internal static int GetModuleHandleHook(IntPtr lpModuleName)
+        
+        public delegate int GetCurrentProcessIdDelegate();
+        
+        [detoursnet.DetoursNet("kernel32.dll", "GetCurrentProcessId", typeof(GetCurrentProcessIdDelegate))]
+        public static int MyGetCurrentProcessId()
         {
-            return 0;
+            return 1234;
         }
     }
 }
