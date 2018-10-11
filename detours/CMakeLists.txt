@@ -24,5 +24,5 @@ target_include_directories(Detours INTERFACE ${DETOURS_INCLUDE_DIR})
 
 add_custom_target(DetoursDll
 	DEPENDS Detours
-	COMMAND link /dll /machine:x64 /NXCOMPAT /DYNAMICBASE /NOENTRY /def:${CMAKE_CURRENT_SOURCE_DIR}/Detours.def /OUT:${LIBRARY_OUTPUT_PATH}/Debug/Detours.dll ${DETOURS_LIB_DIR}/detours.lib kernel32.lib msvcrt.lib vcruntime.lib ucrt.lib
+	COMMAND link /dll /machine:x64 /DEBUG /PDB:${DETOURS_LIB_DIR}/detours.pdb /NXCOMPAT /DYNAMICBASE /NOENTRY /def:${CMAKE_CURRENT_SOURCE_DIR}/Detours.def /OUT:${LIBRARY_OUTPUT_PATH}/Debug/Detours.dll ${DETOURS_LIB_DIR}/detours.lib kernel32.lib msvcrt.lib vcruntime.lib ucrt.lib
 )

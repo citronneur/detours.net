@@ -27,25 +27,29 @@ namespace detoursnetloader
         [DllImport("Detours.dll")]
         internal static extern long DetourTransactionCommit();
 
-        delegate int GetCurrentProcessIdDelegate();
+
         /// <summary>
         /// Main entry point of loader
         /// </summary>
         public static void DetoursNetLoader_Start()
         {
 
-            Assembly plugin = Assembly.LoadFile("c:\\dev\\build_x64\\bin\\Debug\\TraceCreateFile.dll");
-            MethodInfo method = plugin.GetType("tracecreatefile.TraceCreateFile").GetMethod("MyGetCurrentProcessId");
-            
-            Delegate methodDelegate = Delegate.CreateDelegate(typeof(GetCurrentProcessIdDelegate), method);
-            
-            IntPtr a = Marshal.GetFunctionPointerForDelegate(methodDelegate);
-            IntPtr kernel32 = GetModuleHandle("kernel32");
-            IntPtr pGetCurrentProcessId = GetProcAddress(kernel32, "GetCurrentProcessId");
+            Assembly plugin = Assembly.LoadFile("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
+            MethodInfo method = plugin.GetType("slowsleep.SlowSleep").GetMethod("Sleep");
+            var attribute = (detoursnet.DetoursNetAttribute)method.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false)[0];
+
+
+            attribute.Mine = Delegate.CreateDelegate(attribute.DelegateType, method);
+                
+            IntPtr kernel32 = GetModuleHandle(attribute.Module);
+            IntPtr real = GetProcAddress(kernel32, "Sleep");
+
             DetourTransactionBegin();
             DetourUpdateThread(GetCurrentThread());
-            DetourAttach(ref pGetCurrentProcessId, a);
-            long ret =  DetourTransactionCommit();
+            DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(attribute.Mine));
+            DetourTransactionCommit();
+
+            attribute.Real = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
         }
     }
 }

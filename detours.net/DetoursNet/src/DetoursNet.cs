@@ -8,14 +8,14 @@ namespace detoursnet
     public class DetoursNetAttribute : Attribute
     {
         public string Module { get; set; }
-        public string Function { get; set; }
-        public Type Delegate { get; set; }
+        public Type DelegateType { get; set; }
+        public Delegate Real { get; set; }
+        public Delegate Mine { get; set; }
 
-        public DetoursNetAttribute(string module, string function, Type deleg)
+        public DetoursNetAttribute(string module, Type delegateType)
         {
             this.Module = module;
-            this.Function = function;
-            this.Delegate = deleg;
+            this.DelegateType = delegateType;
         }
     }
 }

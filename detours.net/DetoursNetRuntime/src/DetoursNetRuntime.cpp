@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 	STARTUPINFO startupInfo = { 0 };
 	startupInfo.cb = sizeof(startupInfo);
 	if (!DetourCreateProcessWithDll(
-			TEXT("C:\\Windows\\notepad.exe"), 
+			TEXT("c:\\dev\\build_x64\\bin\\Debug\\Sleep.exe"), 
 			NULL, 
 			NULL, 
 			NULL, 

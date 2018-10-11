@@ -12,6 +12,10 @@ __declspec(dllexport) void Dummy()
 }
 
 BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved) {
-	DetoursNetLoader_Start();
+	if (fdwReason == DLL_PROCESS_ATTACH)
+	{
+		DetoursNetLoader_Start();
+	}
+		
 	return TRUE; 
 }

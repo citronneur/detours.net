@@ -6,6 +6,7 @@ set(DETOURSNETLOADER_SRC
 )
 
 add_library(DetoursNetLoaderInitial SHARED ${DETOURSNETLOADER_SRC})
+target_link_libraries(DetoursNetLoaderInitial DetoursNet)
 
 add_custom_target(DetoursNetLoaderExport ALL
 	COMMAND ildasm /OUT=${CMAKE_CURRENT_BINARY_DIR}/DetoursNetLoaderInitial.il /UTF8 ${LIBRARY_OUTPUT_PATH}/Debug/DetoursNetLoaderInitial.dll # Generate intermediate languages
