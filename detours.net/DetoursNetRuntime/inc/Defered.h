@@ -12,7 +12,7 @@ namespace detoursnetsandbox
 		///
 		///	@param	deferedFunction function to call when RAI
 		///
-		Defered(std::function<void(void)>&& deferedFunction);
+		Defered(std::function<void(void)> deferedFunction);
 
 		///
 		///	@brief	call when dtor is called
