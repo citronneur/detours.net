@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace detoursnetloader
 {
@@ -34,22 +35,35 @@ namespace detoursnetloader
         public static void DetoursNetLoader_Start()
         {
 
-            Assembly plugin = Assembly.LoadFile("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
-            MethodInfo method = plugin.GetType("slowsleep.SlowSleep").GetMethod("Sleep");
-            var attribute = (detoursnet.DetoursNetAttribute)method.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false)[0];
+            Assembly assembly = Assembly.LoadFile("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
 
+            var methods = assembly.GetTypes()
+                .SelectMany(t => t.GetMethods())
+                .Where(m => m.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false).Length > 0)
+                .ToArray();
+            foreach (var method in methods)
+            {
 
-            attribute.Mine = Delegate.CreateDelegate(attribute.DelegateType, method);
-                
-            IntPtr kernel32 = GetModuleHandle(attribute.Module);
-            IntPtr real = GetProcAddress(kernel32, "Sleep");
+                var attribute = (detoursnet.DetoursNetAttribute)method.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false)[0];
+                detoursnet.DetoursNet.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
 
-            DetourTransactionBegin();
-            DetourUpdateThread(GetCurrentThread());
-            DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(attribute.Mine));
-            DetourTransactionCommit();
+                IntPtr module = GetModuleHandle(attribute.Module);
+                if (module == IntPtr.Zero)
+                    continue;
 
-            attribute.Real = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
+                IntPtr real = GetProcAddress(module, method.Name);
+                if (real == IntPtr.Zero)
+                    continue;
+
+                DetourTransactionBegin();
+                DetourUpdateThread(GetCurrentThread());
+                DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(detoursnet.DetoursNet.Mine[method]));
+                DetourTransactionCommit();
+
+                detoursnet.DetoursNet.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
+            }
+            
         }
     }
 }
+ 

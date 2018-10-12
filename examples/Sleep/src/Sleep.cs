@@ -8,15 +8,19 @@ namespace slowsleep
     {
         
         public delegate void SleepDelegate(int dwMilliseconds);
-        internal static SleepDelegate RealSleep;
         
         [detoursnet.DetoursNet("kernel32.dll", typeof(SleepDelegate))]
         public static void Sleep(int dwMilliseconds)
         {
-            var attribute = (detoursnet.DetoursNetAttribute)typeof(SlowSleep).GetMethod("Sleep").GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false)[0];
-            Console.WriteLine("Hooked!!!!!   hhh" + attribute.Module);
+           detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
+        }
 
-            attribute.Real.DynamicInvoke(new object[] { dwMilliseconds });
+        public delegate IntPtr HeapAllocDelegate(IntPtr handle, int dwFlags, int dwBytes);
+
+        [detoursnet.DetoursNet("kernel32.dll", typeof(HeapAllocDelegate))]
+        public static IntPtr HeapAlloc(IntPtr handle, int dwFlags, int dwBytes)
+        {
+            return (IntPtr)detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { handle, dwFlags, dwBytes });
         }
     }
 }
