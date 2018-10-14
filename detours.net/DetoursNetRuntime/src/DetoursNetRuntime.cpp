@@ -11,12 +11,13 @@ int main(int argc, char** argv)
 	STARTUPINFO startupInfo = { 0 };
 	startupInfo.cb = sizeof(startupInfo);
 	if (!DetourCreateProcessWithDll(
-			TEXT("c:\\dev\\build_x64\\bin\\Debug\\Sleep.exe"), 
+			//TEXT("c:\\dev\\build_x64\\bin\\Debug\\Sleep.exe"),
+			TEXT("c:\\windows\\notepad.exe"),
 			NULL, 
 			NULL, 
 			NULL, 
 			FALSE, 
-			NULL, 
+			CREATE_SUSPENDED, 
 			reinterpret_cast<LPVOID>(const_cast<char*>(detoursnetsandbox::utils::UpdateEnvVariableWithPath("c:\\dev\\build_x64\\bin\\Debug").data())),
 			NULL, 
 			&startupInfo, 
@@ -28,5 +29,6 @@ int main(int argc, char** argv)
 		std::cerr << "[!] cannot create process" << std::endl;
 		return 1;
 	}
+	ResumeThread(processInfo.hThread);
 	return 0;
 }

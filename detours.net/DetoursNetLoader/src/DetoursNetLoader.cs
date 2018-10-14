@@ -41,9 +41,9 @@ namespace detoursnetloader
                 .SelectMany(t => t.GetMethods())
                 .Where(m => m.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false).Length > 0)
                 .ToArray();
+
             foreach (var method in methods)
             {
-
                 var attribute = (detoursnet.DetoursNetAttribute)method.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false)[0];
                 detoursnet.DetoursNet.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
 

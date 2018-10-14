@@ -12,15 +12,33 @@ namespace slowsleep
         [detoursnet.DetoursNet("kernel32.dll", typeof(SleepDelegate))]
         public static void Sleep(int dwMilliseconds)
         {
-           detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
+            //Console.WriteLine("Sleep");
+            detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
         }
 
-        public delegate IntPtr HeapAllocDelegate(IntPtr handle, int dwFlags, int dwBytes);
+        public delegate IntPtr CreateFileDelegate(
+                string lpFileName,
+                uint dwDesiredAccess,
+                uint dwShareMode,
+                IntPtr SecurityAttributes,
+                uint dwCreationDisposition,
+                uint dwFlagsAndAttributes,
+                IntPtr hTemplateFile
+                );
 
-        [detoursnet.DetoursNet("kernel32.dll", typeof(HeapAllocDelegate))]
-        public static IntPtr HeapAlloc(IntPtr handle, int dwFlags, int dwBytes)
+        [detoursnet.DetoursNet("kernel32.dll", typeof(CreateFileDelegate))]
+        public static IntPtr CreateFileA(
+                string lpFileName,
+                uint dwDesiredAccess,
+                uint dwShareMode,
+                IntPtr SecurityAttributes,
+                uint dwCreationDisposition,
+                uint dwFlagsAndAttributes,
+                IntPtr hTemplateFile
+                )
         {
-            return (IntPtr)detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { handle, dwFlags, dwBytes });
+            Console.WriteLine(lpFileName);
+            return (IntPtr)detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
         }
     }
 }
