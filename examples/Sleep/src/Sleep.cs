@@ -12,7 +12,7 @@ namespace slowsleep
         [detoursnet.DetoursNet("kernel32.dll", typeof(SleepDelegate))]
         public static void Sleep(int dwMilliseconds)
         {
-            //Console.WriteLine("Sleep");
+            Console.WriteLine("Sleep");
             detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
         }
 
@@ -27,7 +27,7 @@ namespace slowsleep
                 );
 
         [detoursnet.DetoursNet("kernel32.dll", typeof(CreateFileDelegate))]
-        public static IntPtr CreateFileA(
+        public static IntPtr CreateFileW(
                 string lpFileName,
                 uint dwDesiredAccess,
                 uint dwShareMode,
