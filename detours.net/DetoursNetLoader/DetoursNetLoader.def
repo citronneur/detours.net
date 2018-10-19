@@ -1,3 +1,0 @@
-LIBRARY DETOURSNETLOADER
-EXPORTS
-	DetoursNetLoader_Start

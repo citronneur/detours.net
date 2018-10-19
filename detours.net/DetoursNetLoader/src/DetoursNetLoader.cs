@@ -32,7 +32,7 @@ namespace detoursnetloader
         /// <summary>
         /// Main entry point of loader
         /// </summary>
-        public static void DetoursNetLoader_Start()
+        public static int DetoursNetLoader_Start(string arguments)
         {
 
             Assembly assembly = Assembly.LoadFile("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
@@ -62,6 +62,8 @@ namespace detoursnetloader
 
                 detoursnet.DetoursNet.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
             }
+
+            return 0;
             
         }
     }

@@ -6,4 +6,4 @@ set(DETOURSNETPIVOT_SRC
 )
 
 add_library(DetoursNetPivot SHARED ${DETOURSNETPIVOT_SRC})
-target_link_libraries(DetoursNetPivot Detours DetoursNetLoader)
+target_link_libraries(DetoursNetPivot Detours DetoursNetLoader mscoree)
