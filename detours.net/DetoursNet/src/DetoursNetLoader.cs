@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Linq;
 
-namespace detoursnetloader
+namespace detoursnet
 {
     public class DetoursNetLoader
     {
@@ -32,19 +32,19 @@ namespace detoursnetloader
         /// <summary>
         /// Main entry point of loader
         /// </summary>
-        public static int DetoursNetLoader_Start(string arguments)
+        public static int Start(string arguments)
         {
 
-            Assembly assembly = Assembly.LoadFile("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
+            Assembly assembly = Assembly.LoadFrom("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
 
             var methods = assembly.GetTypes()
                 .SelectMany(t => t.GetMethods())
-                .Where(m => m.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false).Length > 0)
+                .Where(m => m.GetCustomAttributes(typeof(DetoursNetAttribute), false).Length > 0)
                 .ToArray();
 
             foreach (var method in methods)
             {
-                var attribute = (detoursnet.DetoursNetAttribute)method.GetCustomAttributes(typeof(detoursnet.DetoursNetAttribute), false)[0];
+                var attribute = (DetoursNetAttribute)method.GetCustomAttributes(typeof(DetoursNetAttribute), false)[0];
                 detoursnet.DetoursNet.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
 
                 IntPtr module = GetModuleHandle(attribute.Module);

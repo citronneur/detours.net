@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-namespace detoursnetsandbox
+namespace runtime
 {
 	///
 	///	@brief	Handle RAI for a lambda function
