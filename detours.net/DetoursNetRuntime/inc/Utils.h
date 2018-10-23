@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace detoursnetsandbox
+namespace runtime
 {
 	namespace utils
 	{

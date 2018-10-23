@@ -6,5 +6,5 @@ set(DETOURSNETLOADERTST_SRC
 )
 
 add_executable(DetoursNetLoaderTst ${DETOURSNETLOADERTST_SRC})
-target_link_libraries(DetoursNetLoaderTst DetoursNetLoader)
+target_link_libraries(DetoursNetLoaderTst DetoursNet)
 set_target_properties(DetoursNetLoaderTst PROPERTIES FOLDER "tests")

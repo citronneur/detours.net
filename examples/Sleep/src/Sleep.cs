@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using detoursnet;
 
 namespace slowsleep
 {
@@ -9,15 +10,15 @@ namespace slowsleep
         
         public delegate void SleepDelegate(int dwMilliseconds);
         
-        [detoursnet.DetoursNet("kernel32.dll", typeof(SleepDelegate))]
+        [DetoursNet("kernel32.dll", typeof(SleepDelegate))]
         public static void Sleep(int dwMilliseconds)
         {
             Console.WriteLine("Sleep");
-            detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
+            DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
         }
 
         public delegate IntPtr CreateFileDelegate(
-                string lpFileName,
+                IntPtr lpFileName,
                 uint dwDesiredAccess,
                 uint dwShareMode,
                 IntPtr SecurityAttributes,
@@ -26,9 +27,9 @@ namespace slowsleep
                 IntPtr hTemplateFile
                 );
 
-        [detoursnet.DetoursNet("kernel32.dll", typeof(CreateFileDelegate))]
+        [DetoursNet("kernel32.dll", typeof(CreateFileDelegate))]
         public static IntPtr CreateFileW(
-                string lpFileName,
+                IntPtr lpFileName,
                 uint dwDesiredAccess,
                 uint dwShareMode,
                 IntPtr SecurityAttributes,
@@ -37,8 +38,9 @@ namespace slowsleep
                 IntPtr hTemplateFile
                 )
         {
-            Console.WriteLine(lpFileName);
-            return (IntPtr)detoursnet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
+            string name = Marshal.PtrToStringUni(lpFileName);
+            Console.WriteLine(name);
+            return (IntPtr)DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
         }
     }
 }

@@ -8,13 +8,13 @@ set(DETOURSNETRUNTIME_INC
 
 set(DETOURSNETRUNTIME_SRC
 	src/Defered.cpp
-	src/DetoursNetRuntime.cpp
+	src/Runtime.cpp
 	src/Utils.cpp
 )
 
 add_executable(DetoursNetRuntime ${DETOURSNETRUNTIME_SRC} ${DETOURSNETRUNTIME_INC})
 add_dependencies(DetoursNetRuntime DetoursNetPivot)
-add_dependencies(DetoursNetRuntime DetoursNetLoader)
+add_dependencies(DetoursNetRuntime DetoursNet)
 target_link_libraries(DetoursNetRuntime Detours)
 target_include_directories(DetoursNetRuntime PRIVATE inc)
 

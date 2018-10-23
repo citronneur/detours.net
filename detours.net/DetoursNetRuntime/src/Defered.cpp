@@ -1,6 +1,6 @@
 #include "Defered.h"
 
-namespace detoursnetsandbox
+namespace runtime
 {
 	Defered::Defered(std::function<void(void)> deferedFunction)
 		: mDeferedFunction{ std::forward<std::function<void(void)>>(deferedFunction) }

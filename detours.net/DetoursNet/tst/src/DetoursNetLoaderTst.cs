@@ -8,7 +8,7 @@ namespace detoursnet
     {
         static void Main(string[] args)
         {
-            detoursnetloader.DetoursNetLoader.DetoursNetLoader_Start("foo");
+            DetoursNetLoader.Start("foo");
         }
     }
 }

@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 			NULL, 
 			FALSE, 
 			CREATE_SUSPENDED, 
-			reinterpret_cast<LPVOID>(const_cast<char*>(detoursnetsandbox::utils::UpdateEnvVariableWithPath("c:\\dev\\build_x64\\bin\\Debug").data())),
+			reinterpret_cast<LPVOID>(const_cast<char*>(runtime::utils::UpdateEnvVariableWithPath("c:\\dev\\build_x64\\bin\\Debug").data())),
 			NULL, 
 			&startupInfo, 
 			&processInfo,

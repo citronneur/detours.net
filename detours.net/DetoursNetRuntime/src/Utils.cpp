@@ -16,14 +16,14 @@ namespace
 	}
 }
 
-namespace detoursnetsandbox
+namespace runtime
 {
 	namespace utils
 	{
 		std::string UpdateEnvVariableWithPath(const std::string& newPath)
 		{
 			LPCH environmentStrings = GetEnvironmentStrings();
-			detoursnetsandbox::Defered guard([&environmentStrings]() {
+			runtime::Defered guard([&environmentStrings]() {
 				FreeEnvironmentStrings(environmentStrings);
 			});
 
