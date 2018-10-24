@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-
-namespace detoursnet
+using DetoursNet;
+namespace DetoursNetLoaderTst
 {
     public class DetoursNetLoaderTst
     {
         static void Main(string[] args)
         {
-            DetoursNetLoader.Start("foo");
+            Loader.Start("foo");
         }
     }
 }

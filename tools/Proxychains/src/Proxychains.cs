@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using detoursnet;
+using DetoursNet;
 
-namespace slowsleep
+namespace Proxychains
 {
-    public class SlowSleep
+    public class WS2_32
     {
         
         public delegate void SleepDelegate(int dwMilliseconds);
         
-        [DetoursNet("kernel32.dll", typeof(SleepDelegate))]
+        [Detours("kernel32.dll", typeof(SleepDelegate))]
         public static void Sleep(int dwMilliseconds)
         {
             Console.WriteLine("Sleep");
-            DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
+            DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
         }
 
         public delegate IntPtr CreateFileDelegate(
@@ -27,7 +27,7 @@ namespace slowsleep
                 IntPtr hTemplateFile
                 );
 
-        [DetoursNet("kernel32.dll", typeof(CreateFileDelegate))]
+        [Detours("kernel32.dll", typeof(CreateFileDelegate))]
         public static IntPtr CreateFileW(
                 IntPtr lpFileName,
                 uint dwDesiredAccess,
@@ -40,7 +40,7 @@ namespace slowsleep
         {
             string name = Marshal.PtrToStringUni(lpFileName);
             Console.WriteLine(name);
-            return (IntPtr)DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
+            return (IntPtr)DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
         }
     }
 }

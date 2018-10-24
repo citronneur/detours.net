@@ -3,15 +3,6 @@
 #include "detours.h"
 #include <metahost.h>
 
-// All message out of CRT
-static const wchar_t* sMessageInitConsole = L"[+] Init console\n";
-static const wchar_t* sFailedCreateInstance = L"[!] Failed to create meta host instance\n";
-static const wchar_t* sFailedToGetRuntimeVersion = L"[!] Failed to get specified runtime\n";
-static const wchar_t* sFailedToInitRuntime = L"[!] Failed to init runtime\n";
-static const wchar_t* sFailedToStartRuntime = L"[!] Failed to start runtime\n";
-static const wchar_t* sFailedToLoadRuntime = L"[!] Unable to load runtime\n";
-static const wchar_t* sFailedToLoadAssembly = L"[!] Failed to load detoursnet assembly\n";
-
 // With detours inject mechanism we need an export
 // Detours rewrite import table with target DLL as first entry
 // If dll has no export loader throw 0xc000007b
@@ -26,6 +17,17 @@ typedef int(*MAIN_FUNCTION)(void);
 // Pointer to keep trace of real main
 MAIN_FUNCTION Main = NULL;
 
+// Non CRT Print function
+static void Print(const wchar_t* message)
+{
+	HANDLE std_out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	// use write console because no crt is init
+	DWORD szMessage;
+	WriteConsole(std_out, message, lstrlenW(message), &szMessage, NULL);
+	FlushFileBuffers(std_out);
+}
+
 // New Main!
 static int DetourMain(void)
 {
@@ -36,40 +38,37 @@ static int DetourMain(void)
 		return -1;
 	}
 
-	HANDLE std_out = GetStdHandle(STD_OUTPUT_HANDLE);
-
 	// use write console because no crt is init
-	DWORD szMessage;
-	WriteConsole(std_out, sMessageInitConsole, sizeof(sMessageInitConsole), &szMessage, NULL);
+	Print(L"[+] Init console\n");
 
 	// build meta host
 	ICLRMetaHost *pMetaHost = NULL;
 	if (FAILED(CLRCreateInstance(CLSID_CLRMetaHost, IID_PPV_ARGS(&pMetaHost)))) {
-		WriteConsole(std_out, sFailedCreateInstance, sizeof(sFailedCreateInstance), &szMessage, NULL);
+		Print(L"[!] Failed to create meta host instance\n");
 		return -1;
 	}
 
 	// Load runtime
 	ICLRRuntimeInfo *pRuntimeInfo = NULL;
 	if (FAILED(pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo)))) {
-		WriteConsole(std_out, sFailedToGetRuntimeVersion, sizeof(sFailedToGetRuntimeVersion), &szMessage, NULL);
+		Print(L"[!] Failed to get specified runtime\n");
 		return -1;
 	}
 
 	BOOL isLoadable = FALSE;
 	if (FAILED(pRuntimeInfo->IsLoadable(&isLoadable)) || !isLoadable) {
-		WriteConsole(std_out, sFailedToLoadRuntime, sizeof(sFailedToLoadRuntime), &szMessage, NULL);
+		Print(L"[!] Unable to load runtime\n");
 		return -1;
 	}
 
 	if (FAILED(pRuntimeInfo->GetInterface(CLSID_CLRRuntimeHost, IID_PPV_ARGS(&pClrRuntimeHost)))) {
-		WriteConsole(std_out, sFailedToInitRuntime, sizeof(sFailedToInitRuntime), &szMessage, NULL);
+		Print(L"[!] Failed to init runtime\n");
 		return -1;
 	}
 
 	// start runtime
 	if (FAILED(pClrRuntimeHost->Start())) {
-		WriteConsole(std_out, sFailedToStartRuntime, sizeof(sFailedToStartRuntime), &szMessage, NULL);
+		Print(L"[!] Failed to start runtime\n");
 		return -1;
 	}
 
@@ -77,14 +76,13 @@ static int DetourMain(void)
 	DWORD pReturnValue;
 	if (FAILED(pClrRuntimeHost->ExecuteInDefaultAppDomain(
 		L"c:\\dev\\build_x64\\bin\\Debug\\DetoursNet.dll",
-		L"detoursnet.DetoursNetLoader",
+		L"DetoursNet.Loader",
 		L"Start",
 		L"",
 		&pReturnValue))) {
-		WriteConsole(std_out, sFailedToLoadAssembly, sizeof(sFailedToLoadAssembly), &szMessage, NULL);
+		Print(L"[!] Failed to load DetoursNet assembly\n");
 		return -1;
 	}
-
 
 	// free resources
 	pMetaHost->Release();
@@ -95,6 +93,7 @@ static int DetourMain(void)
 	return Main();
 }
 
+// Dll main fist code execute in current process
 BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID lpvReserved) {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{

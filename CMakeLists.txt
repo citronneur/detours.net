@@ -27,7 +27,7 @@ SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 add_subdirectory(detours.net)
 add_subdirectory(detours)
-add_subdirectory(examples)
+add_subdirectory(tools)
 
 # Summary
 
