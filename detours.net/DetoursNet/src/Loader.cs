@@ -3,9 +3,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Linq;
 
-namespace detoursnet
+namespace DetoursNet
 {
-    public class DetoursNetLoader
+    public class Loader
     {
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
@@ -13,7 +13,7 @@ namespace detoursnet
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetCurrentThread();
 
-        [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleA", CharSet = CharSet.Ansi)]
+        [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
         [DllImport("Detours.dll")]
@@ -28,24 +28,22 @@ namespace detoursnet
         [DllImport("Detours.dll")]
         internal static extern long DetourTransactionCommit();
 
-
         /// <summary>
         /// Main entry point of loader
         /// </summary>
         public static int Start(string arguments)
         {
-
-            Assembly assembly = Assembly.LoadFrom("c:\\dev\\build_x64\\bin\\Debug\\SlowSleep.dll");
+            Assembly assembly = Assembly.LoadFrom("c:\\dev\\build_x64\\bin\\Debug\\Proxychains.dll");
 
             var methods = assembly.GetTypes()
                 .SelectMany(t => t.GetMethods())
-                .Where(m => m.GetCustomAttributes(typeof(DetoursNetAttribute), false).Length > 0)
+                .Where(m => m.GetCustomAttributes(typeof(DetoursAttribute), false).Length > 0)
                 .ToArray();
 
             foreach (var method in methods)
             {
-                var attribute = (DetoursNetAttribute)method.GetCustomAttributes(typeof(DetoursNetAttribute), false)[0];
-                detoursnet.DetoursNet.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
+                var attribute = (DetoursAttribute)method.GetCustomAttributes(typeof(DetoursAttribute), false)[0];
+                DetoursNet.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
 
                 IntPtr module = GetModuleHandle(attribute.Module);
                 if (module == IntPtr.Zero)
@@ -57,10 +55,10 @@ namespace detoursnet
 
                 DetourTransactionBegin();
                 DetourUpdateThread(GetCurrentThread());
-                DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(detoursnet.DetoursNet.Mine[method]));
+                DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(DetoursNet.Mine[method]));
                 DetourTransactionCommit();
 
-                detoursnet.DetoursNet.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
+                DetoursNet.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
             }
 
             return 0;

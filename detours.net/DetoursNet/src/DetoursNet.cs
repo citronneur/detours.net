@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace detoursnet
+namespace DetoursNet
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class DetoursNetAttribute : Attribute
+    public class DetoursAttribute : Attribute
     {
         public string Module { get; set; }
         public Type DelegateType { get; set; }
 
-        public DetoursNetAttribute(string module, Type delegateType)
+        public DetoursAttribute(string module, Type delegateType)
         {
             this.Module = module;
             this.DelegateType = delegateType;
         }
     }
+
     public class DetoursNet
     {
         /// <summary>
