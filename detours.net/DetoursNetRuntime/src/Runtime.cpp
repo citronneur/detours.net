@@ -4,9 +4,12 @@
 #include "detours.h"
 #include "Defered.h"
 #include "Utils.h"
+#include "EnvVar.h"
 
 int main(int argc, char** argv)
 {
+	runtime::EnvVar vars;
+	vars.LoadFromAPI();
 	PROCESS_INFORMATION processInfo;
 	STARTUPINFO startupInfo = { 0 };
 	startupInfo.cb = sizeof(startupInfo);
