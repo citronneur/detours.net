@@ -33,7 +33,10 @@ namespace DetoursNet
         /// </summary>
         public static int Start(string arguments)
         {
-            Assembly assembly = Assembly.LoadFrom("c:\\dev\\build_x64\\bin\\Debug\\Proxychains.dll");
+            string assemblyName = System.Environment.GetEnvironmentVariable("DETOURSNET_ASSEMBLY_PLUGIN");
+            Console.WriteLine("[+] Load assembly plugin " + assemblyName);
+
+            Assembly assembly = Assembly.LoadFrom(assemblyName);
 
             var methods = assembly.GetTypes()
                 .SelectMany(t => t.GetMethods())
