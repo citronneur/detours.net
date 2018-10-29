@@ -2,8 +2,12 @@
 
 namespace runtime
 {
-	Defered::Defered(std::function<void(void)> deferedFunction)
-		: mDeferedFunction{ std::forward<std::function<void(void)>>(deferedFunction) }
+	Defered::Defered(const std::function<void(void)>& deferedFunction)
+		: mDeferedFunction{ deferedFunction }
+	{}
+
+	Defered::Defered(std::function<void(void)>&& deferedFunction)
+		: mDeferedFunction{ std::move(deferedFunction) }
 	{}
 
 	Defered::~Defered()

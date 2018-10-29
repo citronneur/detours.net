@@ -10,18 +10,28 @@ int main(int argc, char** argv)
 {
 	runtime::EnvVar vars;
 	vars.LoadFromAPI();
+
+	// Get current path
+	char sCurrentDirectory[MAX_PATH];
+	if (GetCurrentDirectory(MAX_PATH, sCurrentDirectory) == 0) {
+		std::cerr << "[!] cannot get current directory" << std::endl;
+		return 1;
+	}
+
+	vars.Update("PATH", sCurrentDirectory);
+	vars.Add("DETOURSNET_ASSEMBLY_PLUGIN", argv[1]);
+
 	PROCESS_INFORMATION processInfo;
 	STARTUPINFO startupInfo = { 0 };
 	startupInfo.cb = sizeof(startupInfo);
 	if (!DetourCreateProcessWithDll(
-			//TEXT("c:\\dev\\build_x64\\bin\\Debug\\Sleep.exe"),
-			TEXT("c:\\windows\\notepad.exe"),
+			argv[2],
 			NULL, 
 			NULL, 
 			NULL, 
 			FALSE, 
 			CREATE_SUSPENDED, 
-			reinterpret_cast<LPVOID>(const_cast<char*>(runtime::utils::UpdateEnvVariableWithPath("c:\\dev\\build_x64\\bin\\Debug").data())),
+			reinterpret_cast<LPVOID>(const_cast<char*>(vars.Data().data())),
 			NULL, 
 			&startupInfo, 
 			&processInfo,
