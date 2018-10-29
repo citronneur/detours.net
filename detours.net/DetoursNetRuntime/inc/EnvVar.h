@@ -24,6 +24,8 @@ namespace runtime
 		void ParseFromString(const std::string& allVar);
 		void LoadFromAPI();
 		void Add(const std::string& name, const std::string& value);
+		void Update(const std::string& name, const std::string& value);
+		std::string Data() const;
 
 	private:
 		///

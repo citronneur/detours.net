@@ -34,9 +34,7 @@ static int DetourMain(void)
 	ICLRRuntimeHost *pClrRuntimeHost = NULL;
 
 	// fisrt try to attach console
-	if (!AllocConsole()) {
-		return -1;
-	}
+	AllocConsole();
 
 	// use write console because no crt is init
 	Print(L"[+] Init console\n");

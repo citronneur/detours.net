@@ -7,40 +7,31 @@ namespace Proxychains
 {
     public class WS2_32
     {
-        
-        public delegate void SleepDelegate(int dwMilliseconds);
-        
-        [Detours("kernel32.dll", typeof(SleepDelegate))]
-        public static void Sleep(int dwMilliseconds)
+        [StructLayout(LayoutKind.Sequential)]
+        public struct in_addr
         {
-            Console.WriteLine("Sleep");
-            DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
+            public byte s_b1;
+            public byte s_b2;
+            public byte s_b3;
+            public byte s_b4;
         }
 
-        public delegate IntPtr CreateFileDelegate(
-                IntPtr lpFileName,
-                uint dwDesiredAccess,
-                uint dwShareMode,
-                IntPtr SecurityAttributes,
-                uint dwCreationDisposition,
-                uint dwFlagsAndAttributes,
-                IntPtr hTemplateFile
-                );
-
-        [Detours("kernel32.dll", typeof(CreateFileDelegate))]
-        public static IntPtr CreateFileW(
-                IntPtr lpFileName,
-                uint dwDesiredAccess,
-                uint dwShareMode,
-                IntPtr SecurityAttributes,
-                uint dwCreationDisposition,
-                uint dwFlagsAndAttributes,
-                IntPtr hTemplateFile
-                )
+        [StructLayout(LayoutKind.Sequential)]
+        public struct sockaddr_in
         {
-            string name = Marshal.PtrToStringUni(lpFileName);
-            Console.WriteLine(name);
-            return (IntPtr)DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
+            public short sin_family;
+            public ushort sin_port;
+            public in_addr sin_addr;
+            private Int64 Zero;
+        }
+
+        public delegate int ConnectDelegate(int s, ref sockaddr_in name, int namelen);
+        
+        [Detours("WS2_32.dll", typeof(ConnectDelegate))]
+        public static int connect(int s, ref sockaddr_in name, int namelen)
+        {
+            Console.WriteLine("connect hooked !!!! family: "+name.sin_family+" port:" + name.sin_port);
+            return (int)DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { s, name, namelen });
         }
     }
 }
