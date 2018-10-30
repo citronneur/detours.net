@@ -18,7 +18,7 @@ namespace DetoursNet
         }
     }
 
-    public class DetoursNet
+    public class DelegateStore
     {
         /// <summary>
         /// Real pointer to function
@@ -29,5 +29,15 @@ namespace DetoursNet
         /// Mine function keep it global durinf lifecycle of application
         /// </summary>
         public static Dictionary<MethodBase, Delegate> Mine = new Dictionary<MethodBase, Delegate>();
+
+        /// <summary>
+        /// Retrieve real delegate associate to real function
+        /// </summary>
+        /// <param name="method">Hook .net function</param>
+        /// <returns>Associate native delegate</returns>
+        public static Delegate GetReal(MethodBase method)
+        {
+            return Real[method];
+        }
     }
 }

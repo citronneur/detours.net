@@ -14,7 +14,8 @@ namespace Proxychains
         public static void Sleep(int dwMilliseconds)
         {
             Console.WriteLine("Sleep");
-            DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { dwMilliseconds });
+
+            ((SleepDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(dwMilliseconds);
         }
 
         public delegate IntPtr CreateFileDelegate(
@@ -40,7 +41,7 @@ namespace Proxychains
         {
             string name = Marshal.PtrToStringUni(lpFileName);
             Console.WriteLine(name);
-            return (IntPtr)DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile }); ;
+            return ((CreateFileDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
         }
     }
 }

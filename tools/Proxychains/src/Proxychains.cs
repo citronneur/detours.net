@@ -25,13 +25,28 @@ namespace Proxychains
             private Int64 Zero;
         }
 
+        /// <summary>
+        /// Delegate of connect function from WS2_32.dll
+        /// </summary>
+        /// <param name="s">native socket</param>
+        /// <param name="name">struct dest connection infos</param>
+        /// <param name="namelen">sizeof name</param>
+        /// <returns></returns>
         public delegate int ConnectDelegate(int s, ref sockaddr_in name, int namelen);
-        
+
+        /// <summary>
+        /// Hook of native connect function from WS2_32.dll
+        /// </summary>
+        /// <param name="s">native socket</param>
+        /// <param name="name">struct dest connection infos</param>
+        /// <param name="namelen">sizeof name</param>
+        /// <returns></returns>
         [Detours("WS2_32.dll", typeof(ConnectDelegate))]
         public static int connect(int s, ref sockaddr_in name, int namelen)
         {
             Console.WriteLine("connect hooked !!!! family: "+name.sin_family+" port:" + name.sin_port);
-            return (int)DetoursNet.DetoursNet.Real[MethodInfo.GetCurrentMethod()].DynamicInvoke(new object[] { s, name, namelen });
+
+            return ((ConnectDelegate)(DelegateStore.GetReal(MethodInfo.GetCurrentMethod())))(s, ref name, namelen);
         }
     }
 }
