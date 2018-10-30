@@ -13,8 +13,8 @@ namespace DetoursNet
         [DllImport("kernel32.dll")]
         private static extern IntPtr GetCurrentThread();
 
-        [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
+        [DllImport("kernel32.dll", EntryPoint = "LoadLibraryW", CharSet = CharSet.Unicode)]
+        private static extern IntPtr LoadLibrary(string lpModuleName);
 
         [DllImport("Detours.dll")]
         internal static extern long DetourAttach(ref IntPtr a, IntPtr b);
@@ -46,22 +46,31 @@ namespace DetoursNet
             foreach (var method in methods)
             {
                 var attribute = (DetoursAttribute)method.GetCustomAttributes(typeof(DetoursAttribute), false)[0];
-                DetoursNet.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
 
-                IntPtr module = GetModuleHandle(attribute.Module);
+                Console.WriteLine("[+] Hooking function " + method.Name + " from " + attribute.Module);
+
+                DelegateStore.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
+
+                IntPtr module = LoadLibrary(attribute.Module);
                 if (module == IntPtr.Zero)
+                {
+                    Console.WriteLine("[!] Failed to load " + attribute.Module);
                     continue;
+                }
 
                 IntPtr real = GetProcAddress(module, method.Name);
                 if (real == IntPtr.Zero)
+                {
+                    Console.WriteLine("[!] Failed to found " + method.Name + " from " + attribute.Module);
                     continue;
-
+                }
+                    
                 DetourTransactionBegin();
                 DetourUpdateThread(GetCurrentThread());
-                DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(DetoursNet.Mine[method]));
+                DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(DelegateStore.Mine[method]));
                 DetourTransactionCommit();
 
-                DetoursNet.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
+                DelegateStore.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
             }
 
             return 0;
