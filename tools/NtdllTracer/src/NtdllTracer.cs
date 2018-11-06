@@ -5,9 +5,10 @@ using DetoursNet;
 
 namespace Proxychains
 {
-    public class WS2_32
+    public class Ntdll
     {
-        
+
+
         public delegate void SleepDelegate(int dwMilliseconds);
         
         [Detours("kernel32.dll", typeof(SleepDelegate))]
@@ -41,6 +42,7 @@ namespace Proxychains
         {
             string name = Marshal.PtrToStringUni(lpFileName);
             Console.WriteLine(name);
+
             return ((CreateFileDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
         }
     }

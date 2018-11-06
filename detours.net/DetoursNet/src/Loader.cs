@@ -16,17 +16,26 @@ namespace DetoursNet
         [DllImport("kernel32.dll", EntryPoint = "LoadLibraryW", CharSet = CharSet.Unicode)]
         private static extern IntPtr LoadLibrary(string lpModuleName);
 
-        [DllImport("Detours.dll")]
+        [DllImport("kernel32.dll", EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        [DllImport("DetoursDll.dll")]
         internal static extern long DetourAttach(ref IntPtr a, IntPtr b);
 
-        [DllImport("Detours.dll")]
+        [DllImport("DetoursDll.dll")]
         internal static extern long DetourUpdateThread(IntPtr a);
 
-        [DllImport("Detours.dll")]
+        [DllImport("DetoursDll.dll")]
         internal static extern long DetourTransactionBegin();
 
-        [DllImport("Detours.dll")]
+        [DllImport("DetoursDll.dll")]
         internal static extern long DetourTransactionCommit();
+
+        [DllImport("DetoursDll.dll")]
+        internal static extern bool DetoursPatchIAT(IntPtr hModule, IntPtr import, IntPtr real);
+
+        [DllImport("DetoursNetPivot.dll", CharSet=CharSet.Ansi)]
+        internal static extern void DetoursPivotSetGetProcAddressCache(string procName, IntPtr real);
 
         /// <summary>
         /// Main entry point of loader
@@ -34,7 +43,7 @@ namespace DetoursNet
         public static int Start(string arguments)
         {
             string assemblyName = System.Environment.GetEnvironmentVariable("DETOURSNET_ASSEMBLY_PLUGIN");
-            Console.WriteLine("[+] Load assembly plugin " + assemblyName);
+            //Console.WriteLine("[+] Load assembly plugin " + assemblyName);
 
             Assembly assembly = Assembly.LoadFrom(assemblyName);
 
@@ -47,34 +56,44 @@ namespace DetoursNet
             {
                 var attribute = (DetoursAttribute)method.GetCustomAttributes(typeof(DetoursAttribute), false)[0];
 
-                Console.WriteLine("[+] Hooking function " + method.Name + " from " + attribute.Module);
-
                 DelegateStore.Mine[method] = Delegate.CreateDelegate(attribute.DelegateType, method);
 
                 IntPtr module = LoadLibrary(attribute.Module);
                 if (module == IntPtr.Zero)
                 {
-                    Console.WriteLine("[!] Failed to load " + attribute.Module);
                     continue;
                 }
 
                 IntPtr real = GetProcAddress(module, method.Name);
                 if (real == IntPtr.Zero)
                 {
-                    Console.WriteLine("[!] Failed to found " + method.Name + " from " + attribute.Module);
                     continue;
                 }
-                    
+
+                // record pointer
+                IntPtr import = real;
+
                 DetourTransactionBegin();
                 DetourUpdateThread(GetCurrentThread());
                 DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(DelegateStore.Mine[method]));
                 DetourTransactionCommit();
+                DetoursPivotSetGetProcAddressCache(method.Name, real);
+
+                IntPtr hClr = GetModuleHandle("clr.dll");
+                if(hClr == IntPtr.Zero)
+                {
+                    Console.WriteLine("[!] Failed to found clr.dll !!! ");
+                }
+
+                if(!DetoursPatchIAT(hClr, import, real))
+                {
+                    Console.WriteLine("[!] Unable to un sandbox clr.dll !!! ");
+                }
 
                 DelegateStore.Real[method] = Marshal.GetDelegateForFunctionPointer(real, attribute.DelegateType);
             }
 
             return 0;
-            
         }
     }
 }

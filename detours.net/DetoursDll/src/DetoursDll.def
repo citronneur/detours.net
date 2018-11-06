@@ -1,4 +1,4 @@
-LIBRARY DETOURS
+LIBRARY DETOURSDLL
 EXPORTS
 	DetourAttach
 	DetourDetach

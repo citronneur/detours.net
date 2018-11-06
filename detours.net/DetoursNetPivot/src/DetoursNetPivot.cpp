@@ -1,7 +1,11 @@
 #include <Windows.h>
 #include <winternl.h>
-#include "detours.h"
+#include "DetoursDll.h"
 #include <metahost.h>
+#include <map>
+#include <string>
+
+std::map<std::string, PVOID> sCache;
 
 // With detours inject mechanism we need an export
 // Detours rewrite import table with target DLL as first entry
@@ -9,6 +13,26 @@
 __declspec(dllexport) void Dummy()
 {
 
+}
+
+extern "C"
+__declspec(dllexport) void DetoursPivotSetGetProcAddressCache(LPCSTR procName, PVOID real)
+{
+	sCache[procName] = real;
+}
+
+static FARPROC WINAPI GetProcAddressHook(_In_ HMODULE hModule, _In_ LPCSTR lpProcName)
+{
+	auto real = sCache.find(lpProcName);
+	if (real == sCache.end())
+	{
+		return GetProcAddress(hModule, lpProcName);
+	}
+	else
+	{
+		return reinterpret_cast<FARPROC>(real->second);
+	}
+	
 }
 
 // The main signature
@@ -22,7 +46,7 @@ static void Print(const wchar_t* message)
 {
 	HANDLE std_out = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	// use write console because no crt is init
+	// use write console API because no crt is init
 	DWORD szMessage;
 	WriteConsole(std_out, message, lstrlenW(message), &szMessage, NULL);
 	FlushFileBuffers(std_out);
@@ -32,7 +56,7 @@ static void Print(const wchar_t* message)
 static int DetourMain(void)
 {
 	ICLRRuntimeHost *pClrRuntimeHost = NULL;
-
+	
 	// fisrt try to attach console
 	AllocConsole();
 
@@ -69,6 +93,9 @@ static int DetourMain(void)
 		Print(L"[!] Failed to start runtime\n");
 		return -1;
 	}
+
+	// patch iat to handle pinvoke from mscorlib
+	DetoursPatchIAT(GetModuleHandle(TEXT("clr.dll")), GetProcAddress, GetProcAddressHook);
 
 	// execute managed assembly
 	DWORD pReturnValue;
