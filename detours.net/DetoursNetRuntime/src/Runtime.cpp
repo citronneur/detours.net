@@ -44,4 +44,4 @@ int main(int argc, char** argv)
 	}
 	ResumeThread(processInfo.hThread);
 	return 0;
-}
+} 

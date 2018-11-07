@@ -4,36 +4,81 @@
 #include <metahost.h>
 #include <map>
 #include <string>
+#include <tuple>
+#include <mutex>
 
-std::map<std::string, PVOID> sCache;
-
-// With detours inject mechanism we need an export
-// Detours rewrite import table with target DLL as first entry
-// If dll has no export loader throw 0xc000007b
-__declspec(dllexport) void Dummy()
+namespace pivot
 {
-
-}
-
-extern "C"
-__declspec(dllexport) void DetoursPivotSetGetProcAddressCache(LPCSTR procName, PVOID real)
-{
-	sCache[procName] = real;
-}
-
-static FARPROC WINAPI GetProcAddressHook(_In_ HMODULE hModule, _In_ LPCSTR lpProcName)
-{
-	auto real = sCache.find(lpProcName);
-	if (real == sCache.end())
+	class Cache
 	{
+	public:
+		//
+		//	@brief	return thread safe instance of cache
+		//
+		static Cache& getInstance()
+		{
+			static Cache cache;
+			return cache;
+		}
+
+		void update(HMODULE hModule, std::string funcName, PVOID pReal)
+		{
+			std::lock_guard<std::mutex> guard(mLock);
+			mCache[std::make_tuple(hModule, funcName)] = pReal;
+		}
+
+		PVOID find(HMODULE hModule, std::string funcName)
+		{
+			std::lock_guard<std::mutex> guard(mLock);
+			auto real = mCache.find(std::make_tuple(hModule, funcName));
+			if (real == mCache.end())
+			{
+				return nullptr;
+			}
+
+			return real->second;
+		}
+	private:
+		// 
+		//	@brief	Cache for all hooked function
+		//
+		std::map<std::tuple<HMODULE, std::string>, PVOID> mCache;
+
+		//
+		//	@brief	Cache access thread safe
+		//
+		std::mutex mLock;
+	};
+	
+
+	/*
+		@brief	Hook GetProcAddress called from clr.dll module
+		@param	hModule	module of target function
+		@param	lpProcName name of function
+	 */
+	static FARPROC WINAPI GetProcAddressCLR(_In_ HMODULE hModule, _In_ LPCSTR lpProcName)
+	{
+		auto real = Cache::getInstance().find(hModule, lpProcName);
+		// already hooked
+		if (real != nullptr) {
+			return reinterpret_cast<FARPROC>(real);
+		}
+
 		return GetProcAddress(hModule, lpProcName);
 	}
-	else
-	{
-		return reinterpret_cast<FARPROC>(real->second);
-	}
-	
 }
+
+// With detours inject technic we need an export
+// Detours rewrite import table with target DLL as first entry
+// If dll has no export loader throw 0xc000007b
+
+extern "C"
+__declspec(dllexport) void DetoursPivotSetGetProcAddressCache(HMODULE hModule, LPCSTR lpProcName, PVOID pReal)
+{
+	pivot::Cache::getInstance().update(hModule, lpProcName, pReal);
+}
+
+
 
 // The main signature
 typedef int(*MAIN_FUNCTION)(void);
@@ -95,7 +140,7 @@ static int DetourMain(void)
 	}
 
 	// patch iat to handle pinvoke from mscorlib
-	DetoursPatchIAT(GetModuleHandle(TEXT("clr.dll")), GetProcAddress, GetProcAddressHook);
+	DetoursPatchIAT(GetModuleHandle(TEXT("clr.dll")), GetProcAddress, pivot::GetProcAddressCLR);
 
 	// execute managed assembly
 	DWORD pReturnValue;
