@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 			NULL, 
 			&startupInfo, 
 			&processInfo,
-			TEXT("DetoursNetPivot.dll"),
+			TEXT("DetoursNetCLR.dll"),
 			NULL)
 		)
 	{

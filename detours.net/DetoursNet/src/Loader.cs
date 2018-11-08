@@ -34,8 +34,8 @@ namespace DetoursNet
         [DllImport("DetoursDll.dll")]
         internal static extern bool DetoursPatchIAT(IntPtr hModule, IntPtr import, IntPtr real);
 
-        [DllImport("DetoursNetPivot.dll", CharSet=CharSet.Ansi)]
-        internal static extern void DetoursPivotSetGetProcAddressCache(IntPtr hModule, string procName, IntPtr real);
+        [DllImport("DetoursNetCLR.dll", CharSet=CharSet.Ansi)]
+        internal static extern void DetoursCLRSetGetProcAddressCache(IntPtr hModule, string procName, IntPtr real);
 
         /// <summary>
         /// Main entry point of loader
@@ -77,7 +77,7 @@ namespace DetoursNet
                 DetourUpdateThread(GetCurrentThread());
                 DetourAttach(ref real, Marshal.GetFunctionPointerForDelegate(DelegateStore.Mine[method]));
                 DetourTransactionCommit();
-                DetoursPivotSetGetProcAddressCache(module, method.Name, real);
+                DetoursCLRSetGetProcAddressCache(module, method.Name, real);
 
                 IntPtr hClr = GetModuleHandle("clr.dll");
                 if(hClr == IntPtr.Zero)
