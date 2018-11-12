@@ -1,5 +1,5 @@
 # Tree processing
 
-add_subdirectory(Proxychains)
-add_subdirectory(NtdllTracer)
+add_subdirectory(proxychains)
+add_subdirectory(procmon)
 
