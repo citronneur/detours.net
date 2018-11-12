@@ -12,6 +12,11 @@ namespace {
 	*/
 	static FARPROC WINAPI GetProcAddressCLR(HMODULE module, LPCSTR funcName)
 	{
+		// if ordinal
+		if ((reinterpret_cast<ULONGLONG>(funcName) & 0xffffffffffff0000) == 0) {
+			return GetProcAddress(module, funcName);
+		}
+
 		auto real = pivot::Cache::GetInstance().find(module, funcName);
 		// already hooked
 		if (real != nullptr) {

@@ -18,6 +18,11 @@ namespace DetoursNet
         }
     }
 
+    [AttributeUsage(AttributeTargets.Method)]
+    public class OnInitAttribute : Attribute
+    {
+    }
+
     public class DelegateStore
     {
         /// <summary>
