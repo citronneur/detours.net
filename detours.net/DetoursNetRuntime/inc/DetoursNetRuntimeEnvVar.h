@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-namespace runtime
+namespace detoursnetruntime
 {
 	///
 	///	@brief	Environment variable
@@ -21,11 +21,11 @@ namespace runtime
 		///
 		virtual ~EnvVar();
 
-		void ParseFromString(const std::string& allVar);
-		void LoadFromAPI();
-		void Add(const std::string& name, const std::string& value);
-		void Update(const std::string& name, const std::string& value);
-		std::string Data() const;
+		void parseFromString(const std::string& allVar);
+		void loadFromAPI();
+		void add(const std::string& name, const std::string& value);
+		void update(const std::string& name, const std::string& value);
+		std::string data() const;
 
 	private:
 		///

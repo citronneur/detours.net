@@ -1,5 +1,5 @@
-#include "EnvVar.h"
-#include "Defered.h"
+#include "DetoursNetRuntimeEnvVar.h"
+#include "DetoursNetRuntimeDefered.h"
 #include <sstream>
 #include <Windows.h>
 
@@ -15,7 +15,7 @@ namespace
 	}
 }
 
-namespace runtime
+namespace detoursnetruntime
 {
 	EnvVar::EnvVar()
 	{}
@@ -24,7 +24,7 @@ namespace runtime
 	{
 	}
 
-	void EnvVar::ParseFromString(const std::string& environmentBlock)
+	void EnvVar::parseFromString(const std::string& environmentBlock)
 	{
 		std::istringstream iss(environmentBlock);
 		std::string envValue;
@@ -39,10 +39,10 @@ namespace runtime
 		}
 	}
 
-	void EnvVar::LoadFromAPI()
+	void EnvVar::loadFromAPI()
 	{
 		LPCH environmentStrings = GetEnvironmentStrings();
-		runtime::Defered guard([&environmentStrings]() {
+		detoursnetruntime::Defered guard([&environmentStrings]() {
 			FreeEnvironmentStrings(environmentStrings);
 		});
 
@@ -59,15 +59,15 @@ namespace runtime
 		}
 
 		// Remove last \0
-		this->ParseFromString(std::string(environmentStrings, envSize - 1));
+		this->parseFromString(std::string(environmentStrings, envSize - 1));
 	}
 
-	void EnvVar::Add(const std::string& name, const std::string& value)
+	void EnvVar::add(const std::string& name, const std::string& value)
 	{
 		mEnVarLines.push_back(name + "=" + value);
 	}
 
-	void EnvVar::Update(const std::string& name, const std::string& value)
+	void EnvVar::update(const std::string& name, const std::string& value)
 	{
 		for (auto& line : mEnVarLines)
 		{
@@ -78,7 +78,7 @@ namespace runtime
 		}
 	}
 
-	std::string EnvVar::Data() const
+	std::string EnvVar::data() const
 	{
 		std::string result;
 		for (auto line : mEnVarLines)

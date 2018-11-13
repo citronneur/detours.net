@@ -61,17 +61,18 @@ namespace ftrace
             uint dwFlagsAndAttributes,
             IntPtr hTemplateFile
         ) {
-            string name = Marshal.PtrToStringUni(lpFileName);
+            
             
             IntPtr result = ((CreateFileDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(lpFileName, dwDesiredAccess, dwShareMode, SecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
+            Console.Write("CreateFile " + Marshal.PtrToStringUni(lpFileName) + " ");
             if((int)result == -1)
             {
-                Console.WriteLine("CreateFile " + name + " " + "FAILED");
+                Console.WriteLine("FAILED");
             }
             else
             {
-                Console.WriteLine("CreateFile " + name + " " + "SUCCESS");
+                Console.WriteLine("SUCCESS");
             }
 
             return result;
@@ -79,11 +80,25 @@ namespace ftrace
 
         public delegate int RegOpenKeyExDelegate(IntPtr hKey, IntPtr lpSubKey, int ulOptions, int samDesired, IntPtr phkResult);
 
-        [Detours("advapi.dll", typeof(RegOpenKeyExDelegate))]
+        [Detours("advapi32.dll", typeof(RegOpenKeyExDelegate))]
         public static int RegOpenKeyExW(IntPtr hKey, IntPtr lpSubKey, int ulOptions, int samDesired, IntPtr phkResult)
         {
-            Console.WriteLine("RegOpenKey ");
-            return ((RegOpenKeyExDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(hKey, lpSubKey, ulOptions, samDesired, phkResult);
+            int result = ((RegOpenKeyExDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(hKey, lpSubKey, ulOptions, samDesired, phkResult);
+            Console.Write("RegOpenKey " + Marshal.PtrToStringUni(lpSubKey) + " ");
+
+            switch(result)
+            {
+                case 0:
+                    Console.WriteLine("SUCCESS");
+                    break;
+                case 5:
+                    Console.WriteLine("ACCESS DENIED");
+                    break;
+                default:
+                    Console.WriteLine("UNKNOWN");
+                    break;
+            }
+            return result;
         }
     }
 }

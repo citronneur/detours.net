@@ -5,15 +5,15 @@
 #include <map>
 #include <mutex>
 
-namespace pivot
+namespace detoursnetclr
 {
-	class Cache
+	class PInvokeCache
 	{
 	public:
 		/*!
 		*	@brief	return thread safe instance of cache
 		*/
-		static Cache& GetInstance();
+		static PInvokeCache& GetInstance();
 
 		/*!
 		*	@brief	Add new entry into cache

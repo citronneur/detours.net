@@ -1,6 +1,6 @@
-#include "Defered.h"
+#include "DetoursNetRuntimeDefered.h"
 
-namespace runtime
+namespace detoursnetruntime
 {
 	Defered::Defered(const std::function<void(void)>& deferedFunction)
 		: mDeferedFunction{ deferedFunction }

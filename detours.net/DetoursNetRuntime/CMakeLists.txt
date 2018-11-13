@@ -2,16 +2,14 @@
 cmake_minimum_required(VERSION 3.11)
 
 set(DETOURSNETRUNTIME_INC
-	inc/Defered.h
-	inc/EnvVar.h
-	inc/Utils.h
+	inc/DetoursNetRuntimeDefered.h
+	inc/DetoursNetRuntimeEnvVar.h
 )
 
 set(DETOURSNETRUNTIME_SRC
-	src/Defered.cpp
-	src/EnvVar.cpp
-	src/Runtime.cpp
-	src/Utils.cpp
+	src/DetoursNetRuntimeDefered.cpp
+	src/DetoursNetRuntimeEnvVar.cpp
+	src/DetoursNetRuntime.cpp
 )
 
 add_executable(DetoursNetRuntime ${DETOURSNETRUNTIME_SRC} ${DETOURSNETRUNTIME_INC})
