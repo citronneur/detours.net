@@ -2,7 +2,7 @@
 #include <winternl.h>
 #include "DetoursDll.h"
 #include <metahost.h>
-#include "../inc/Cache.h"
+#include "../inc/DetoursNetCLRPInvokeCache.h"
 
 namespace {
 	/*!
@@ -17,7 +17,7 @@ namespace {
 			return GetProcAddress(module, funcName);
 		}
 
-		auto real = pivot::Cache::GetInstance().find(module, funcName);
+		auto real = detoursnetclr::PInvokeCache::GetInstance().find(module, funcName);
 		// already hooked
 		if (real != nullptr) {
 			return reinterpret_cast<FARPROC>(real);
@@ -38,20 +38,28 @@ namespace {
 	 *	@param	pReal		real address
 	 */
 	extern "C"
-		__declspec(dllexport) void DetoursCLRSetGetProcAddressCache(HMODULE module, LPCSTR funcName, PVOID real)
+	__declspec(dllexport) void DetoursCLRSetGetProcAddressCache(HMODULE module, LPCSTR funcName, PVOID real)
 	{
-		pivot::Cache::GetInstance().update(module, funcName, real);
+		detoursnetclr::PInvokeCache::GetInstance().update(module, funcName, real);
 	}
 
 
-	using MainFunction_T = int(*)(void);
+	using EntryPoint_T = int(*)(void);
 
 	// Pointer to keep trace of real main
-	MainFunction_T gMain = NULL;
+	EntryPoint_T gMain = NULL;
 
 	// New Main!
 	static int DetourMain(void)
 	{
+		// retrieve current directory
+		wchar_t sDetoursNetPath[MAX_PATH];
+		DWORD szPath = GetModuleFileName(GetModuleHandle(TEXT("DetoursNetCLR.dll")), sDetoursNetPath, MAX_PATH);
+		if (szPath == 0) {
+			return -1;
+		}
+		memcpy(sDetoursNetPath + szPath - 7, TEXT(".dll"), 10);
+
 		ICLRRuntimeHost *pClrRuntimeHost = NULL;
 
 		// build meta host
@@ -86,7 +94,7 @@ namespace {
 		// execute managed assembly
 		DWORD pReturnValue;
 		if (FAILED(pClrRuntimeHost->ExecuteInDefaultAppDomain(
-			L"c:\\dev\\build_x64\\bin\\Debug\\DetoursNet.dll",
+			sDetoursNetPath,
 			L"DetoursNet.Loader",
 			L"Start",
 			L"",
@@ -123,7 +131,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL, _In_ DWORD fdwReason, _In_ LPVOID l
 			return TRUE;
 		}
 		// compute main function address
-		gMain = reinterpret_cast<MainFunction_T>(pImgNTHeaders->OptionalHeader.AddressOfEntryPoint + reinterpret_cast<LPBYTE>(hMainModule));
+		gMain = reinterpret_cast<EntryPoint_T>(pImgNTHeaders->OptionalHeader.AddressOfEntryPoint + reinterpret_cast<LPBYTE>(hMainModule));
 
 		// Detour main function
 		DetourTransactionBegin();

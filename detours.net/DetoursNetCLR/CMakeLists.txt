@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.11)
 
 set(DETOURSNETCLR_SRC
 	src/DetoursNetCLR.cpp
-	inc/Error.h
-	inc/Cache.h
-	src/Cache.cpp
+	inc/DetoursNetCLRError.h
+	inc/DetoursNetCLRPInvokeCache.h
+	src/DetoursNetCLRPInvokeCache.cpp
 )
 
 add_library(DetoursNetCLR SHARED ${DETOURSNETCLR_SRC})

@@ -1,21 +1,21 @@
-#include "../inc/Cache.h"
+#include "../inc/DetoursNetCLRPInvokeCache.h"
 
 
-namespace pivot
+namespace detoursnetclr
 {
-	Cache& Cache::GetInstance()
+	PInvokeCache& PInvokeCache::GetInstance()
 	{
-		static Cache cache;
+		static PInvokeCache cache;
 		return cache;
 	}
 
-	void Cache::update(HMODULE hModule, std::string funcName, PVOID pReal)
+	void PInvokeCache::update(HMODULE hModule, std::string funcName, PVOID pReal)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
 		mCache[std::make_tuple(hModule, funcName)] = pReal;
 	}
 
-	PVOID Cache::find(HMODULE hModule, std::string funcName)
+	PVOID PInvokeCache::find(HMODULE hModule, std::string funcName)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
 		auto real = mCache.find(std::make_tuple(hModule, funcName));

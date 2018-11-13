@@ -2,14 +2,13 @@
 #include <iostream>
 #include <sstream>
 #include "detours.h"
-#include "Defered.h"
-#include "Utils.h"
-#include "EnvVar.h"
+#include "DetoursNetRuntimeDefered.h"
+#include "DetoursNetRuntimeEnvVar.h"
 
 int main(int argc, char** argv)
 {
-	runtime::EnvVar vars;
-	vars.LoadFromAPI();
+	detoursnetruntime::EnvVar vars;
+	vars.loadFromAPI();
 
 	// Get current path
 	char sCurrentDirectory[MAX_PATH];
@@ -18,8 +17,8 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	vars.Update("PATH", sCurrentDirectory);
-	vars.Add("DETOURSNET_ASSEMBLY_PLUGIN", argv[1]);
+	vars.update("PATH", sCurrentDirectory);
+	vars.add("DETOURSNET_ASSEMBLY_PLUGIN", argv[1]);
 
 	PROCESS_INFORMATION processInfo;
 	STARTUPINFO startupInfo = { 0 };
@@ -31,7 +30,7 @@ int main(int argc, char** argv)
 			NULL, 
 			FALSE, 
 			CREATE_SUSPENDED, 
-			reinterpret_cast<LPVOID>(const_cast<char*>(vars.Data().data())),
+			reinterpret_cast<LPVOID>(const_cast<char*>(vars.data().data())),
 			NULL, 
 			&startupInfo, 
 			&processInfo,
