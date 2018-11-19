@@ -17,5 +17,3 @@ add_dependencies(DetoursNetRuntime DetoursNetCLR)
 add_dependencies(DetoursNetRuntime DetoursNet)
 target_link_libraries(DetoursNetRuntime Detours)
 target_include_directories(DetoursNetRuntime PRIVATE inc)
-
-add_subdirectory(tst)

@@ -138,19 +138,40 @@ namespace procmon
         )
         {
             int result = ((RegOpenKeyExWDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(hKey, lpSubKey, ulOptions, samDesired, phkResult);
-
-            if(lpSubKey != null && lpSubKey.Length > 0)
+            
+            if (lpSubKey != null && lpSubKey.Length > 0)
             {
+                string key = lpSubKey;
+                switch((uint)hKey)
+                {
+                    case 0x80000000:
+                        key = @"HKEY_CLASSES_ROOT\" + lpSubKey;
+                        break;
+                    case 0x80000001:
+                        key = @"HKEY_CURRENT_USER\" + lpSubKey;
+                        break;
+                    case 0x80000002:
+                        key = @"HKEY_LOCAL_MACHINE\" + lpSubKey;
+                        break;
+                    case 0x80000003:
+                        key = @"HKEY_USERS\" + lpSubKey;
+                        break;
+                }
+
                 lock(sSync)
                 {
+
                     WriteColor(ConsoleColor.Yellow, "RegOpenKey");
 
-                    Console.Write(" {" + lpSubKey + "} ");
+                    Console.Write(" {" + key + "} ");
 
                     switch (result)
                     {
                         case 0:
                             WriteColor(ConsoleColor.Green, "SUCCESS");
+                            break;
+                        case 2:
+                            WriteColor(ConsoleColor.Red, "FILE NOT FOUND");
                             break;
                         case 5:
                             WriteColor(ConsoleColor.Red, "ACCESS DENIED");
