@@ -5,11 +5,9 @@ Détours.net use CLR as hooking engine. It's based on detours project from Micro
 
 ## Generate a plugin
 
-Imagine you want to use *notepad.exe* to see PE header into *notepad.exe*, you have to use *detours.net*. 
+Imagine you want to use *notepad.exe* to see particular binary file into *notepad.exe*, or if you want to analyse so dropping file from malware, you have to use *detours.net* to generate a *plugin*. 
 
-First step is to generate a plugin.
-
-Plugin is simple a .net DLL link with *detoursnet.dll* assembly.
+First step is to generate a plugin. Plugin is simple a .net DLL link with *detoursnet.dll* assembly.
 
 Then you have to tell *detours.net* how and from which API you want to hook. You just have to declare a delegate which match your target function signature, and declare your associate hook like this :
 
@@ -41,8 +39,20 @@ public static IntPtr CreateFileW(
 }
 ```
 
-That's all. Build your assembly, and run it with *detoursnetruntime.exe*.
+That's all. Build your assembly *myplugin.dll*, and run it with *detoursnetruntime.exe*.
 
 ```bat
-.\detoursNetRuntime myhook.dll c:\windows\notepad.exe
+.\detoursNetRuntime myplugin.dll c:\windows\notepad.exe
 ```
+
+## How does it works ?
+
+### DetoursNetRuntime
+
+*detours.net* is based on detours project from Microsoft, which is mostly use in API hooking. It create a process in suspended mode, and then rewrete the IAT to insert a new dll at first place to be sure *Dllmain* of this dll will be execute first before all other code in your application. That's was be done by detoursNetRuntime, but inject a special DLL called detoursNetCLR.dll described in next chapter.
+
+### DetoursNetCLR
+
+DetoursNetCLR.dll is in charge to load CLR and the DetoursNet.dll assembly in current process. To do that we use CLR hosting from COM Component. But this forbidden from *DllMain* because of *loader lock*. To work around this issue, we use *Detours* from microsoft to hook entry point of target process, and load CLR into new *main* function.
+
+### DetoursNet
