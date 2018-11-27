@@ -15,26 +15,17 @@ Then you have to tell *detours.net* how and from which API you want to hook. You
 // Declare your delegate
 public delegate IntPtr CreateFileWDelegate(
     [MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
-    uint dwDesiredAccess,
-    uint dwShareMode,
-    IntPtr SecurityAttributes,
-    uint dwCreationDisposition,
-    uint dwFlagsAndAttributes,
-    IntPtr hTemplateFile
+    uint dwDesiredAccess, uint dwShareMode, IntPtr SecurityAttributes,
+    uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile
 );
 
 // And now declare your hook
 [Detours("kernel32.dll", typeof(CreateFileWDelegate))]
 public static IntPtr CreateFileW(
     string lpFileName,
-    uint dwDesiredAccess,
-    uint dwShareMode,
-    IntPtr SecurityAttributes,
-    uint dwCreationDisposition,
-    uint dwFlagsAndAttributes,
-    IntPtr hTemplateFile
-)
-{
+    uint dwDesiredAccess, uint dwShareMode, IntPtr SecurityAttributes,
+    uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile
+) {
 ...
 }
 ```
@@ -49,7 +40,7 @@ That's all. Build your assembly *myplugin.dll*, and run it with *detoursnetrunti
 
 ### DetoursNetRuntime
 
-*detours.net* is based on detours project from Microsoft, which is mostly use in API hooking. It create a process in suspended mode, and then rewrete the IAT to insert a new dll at first place to be sure *Dllmain* of this dll will be execute first before all other code in your application. That's was be done by detoursNetRuntime, but inject a special DLL called detoursNetCLR.dll described in next chapter.
+*detours.net* is based on detours project from Microsoft, which is mostly use in API hooking. It create a process in suspended mode, and then rewrite the IAT to insert a new dll at first place. This implies that *Dllmain* of this dll will be execute first before all other code in your application. That's was be done by *detoursNetRuntime.exe*, but inject a special DLL called *detoursNetCLR.dll* described in next chapter.
 
 ### DetoursNetCLR
 
