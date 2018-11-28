@@ -12,20 +12,24 @@ Then you have to tell *detours.net* how and from which API you want to hook. You
 
 ```c#
 // Declare your delegate
-public delegate IntPtr CreateFileWDelegate(
-    [MarshalAs(UnmanagedType.LPWStr)] string lpFileName,
-    uint dwDesiredAccess, uint dwShareMode, IntPtr SecurityAttributes,
-    uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile
+public delegate int CoCreateInstanceDelegate(
+	Guid rclsid, IntPtr pUnkOuter, 
+	int dwClsContext, Guid riid, ref IntPtr ppv
 );
 
 // And now declare your hook
-[Detours("kernel32.dll", typeof(CreateFileWDelegate))]
-public static IntPtr CreateFileW(
-    string lpFileName,
-    uint dwDesiredAccess, uint dwShareMode, IntPtr SecurityAttributes,
-    uint dwCreationDisposition, uint dwFlagsAndAttributes, IntPtr hTemplateFile
-) {
-...
+[Detours("ole32.dll", typeof(CoCreateInstanceDelegate))]
+public static int CoCreateInstance(
+	Guid rclsid, IntPtr pUnkOuter,
+	int dwClsContext, Guid riid, ref IntPtr ppv
+)
+{
+	// Call real function
+	int result = ((CoCreateInstanceDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(rclsid, pUnkOuter, dwClsContext, riid, ref ppv);
+
+	Console.WriteLine(" {" + rclsid.ToString() + "} {" + riid.ToString() + "} " + result.ToString("x"));
+	
+	return result;
 }
 ```
 
