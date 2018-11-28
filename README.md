@@ -5,9 +5,8 @@ Détours.net use CLR as hooking engine. It's based on detours project from Micro
 
 ## Generate a plugin
 
-Imagine you want to use *notepad.exe* to see particular binary file into *notepad.exe*, or if you want to analyse so dropping file from malware, you have to use *detours.net* to generate a *plugin*. 
-
-First step is to generate a plugin. Plugin is simple a .net DLL link with *detoursnet.dll* assembly.
+Imagine you want to log all GUID of COM object use by a target application, like malware, you have to use *detours.net*.
+First step is to generate a plugin. Plugin is simple a .net DLL linked with *detoursnet.dll* assembly.
 
 Then you have to tell *detours.net* how and from which API you want to hook. You just have to declare a delegate which match your target function signature, and declare your associate hook like this :
 
