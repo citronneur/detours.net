@@ -187,5 +187,36 @@ namespace procmon
             
             return result;
         }
+
+        /// <summary>
+        /// Delegate associate to CoCreateInstance
+        /// </summary>
+        /// <param name="rclsid"></param>
+        /// <param name="pUnkOuter"></param>
+        /// <param name="dwClsContext"></param>
+        /// <param name="riid"></param>
+        /// <param name="ppv"></param>
+        /// <returns></returns>
+        public delegate int CoCreateInstanceDelegate(
+            Guid rclsid, IntPtr pUnkOuter, 
+            int dwClsContext, Guid riid, ref IntPtr ppv
+        );
+
+
+        [Detours("ole32.dll", typeof(CoCreateInstanceDelegate))]
+        public static int CoCreateInstance(
+            Guid rclsid, IntPtr pUnkOuter,
+            int dwClsContext, Guid riid, ref IntPtr ppv
+        )
+        {
+            int result = ((CoCreateInstanceDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(rclsid, pUnkOuter, dwClsContext, riid, ref ppv);
+
+            lock (sSync)
+            {
+                WriteColor(ConsoleColor.Yellow, "CoCreateInstance");
+                Console.WriteLine(" {" + rclsid.ToString() + "} {" + riid.ToString() + "} " + result.ToString("x"));
+            }
+            return result;
+        }
     }
 }
