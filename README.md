@@ -1,52 +1,60 @@
 # detours.net
-Détours.net use CLR as hooking engine. It's based on detours project from Microsoft and ability of CLR to generate transition stub for managed function to be called from unmanaged code.
+Détours.net use CLR as hooking engine. It's based on [Detours](https://github.com/Microsoft/Detours) project from Microsoft, and ability of CLR to generate transition stub for managed function to be called from unmanaged code.
 
-*detours.net* is as simple to use as *DllImport* attribute for _pinvoke_ unmanaged code from managed code.
+*detours.net* is as simple to use as *DllImport* attribute.
 
 ## Generate a plugin
 
-Imagine you want to log all GUID of COM object use by a target application, like malware, you have to use *detours.net*.
-First step is to generate a plugin. Plugin is simple a .net DLL linked with *detoursnet.dll* assembly.
+Imagine you want to log all GUID of COM object used by a an application.
+First step is to generate a plugin. Plugin is a simple .net Assembly linked with *detoursnet.dll*.
 
-Then you have to tell *detours.net* how and from which API you want to hook. You just have to declare a delegate which match your target function signature, and declare your associate hook like this :
+Then you have to tell *detours.net* where is original method and how to call it. You just have to declare a delegate which match your target method signature, and declare your associate hook like this :
 
 ```c#
-// Declare your delegate
-public delegate int CoCreateInstanceDelegate(
-	Guid rclsid, IntPtr pUnkOuter, 
-	int dwClsContext, Guid riid, ref IntPtr ppv
-);
-
-// And now declare your hook
-[Detours("ole32.dll", typeof(CoCreateInstanceDelegate))]
-public static int CoCreateInstance(
-	Guid rclsid, IntPtr pUnkOuter,
-	int dwClsContext, Guid riid, ref IntPtr ppv
-)
+namespace myplugin
 {
-	// Call real function
-	int result = ((CoCreateInstanceDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(rclsid, pUnkOuter, dwClsContext, riid, ref ppv);
+    public static class Logger
+    {
+        // Declare your delegate
+        public delegate int CoCreateInstanceDelegate(
+            Guid rclsid, IntPtr pUnkOuter, 
+            int dwClsContext, Guid riid, ref IntPtr ppv
+        );
 
-	Console.WriteLine(" {" + rclsid.ToString() + "} {" + riid.ToString() + "} " + result.ToString("x"));
+        // And now declare your hook
+        [Detours("ole32.dll", typeof(CoCreateInstanceDelegate))]
+        public static int CoCreateInstance(
+            Guid rclsid, IntPtr pUnkOuter,
+	    int dwClsContext, Guid riid, ref IntPtr ppv
+        )
+        {
+            // Call real function
+            int result = ((CoCreateInstanceDelegate)DelegateStore.GetReal(MethodInfo.GetCurrentMethod()))(rclsid, pUnkOuter, dwClsContext, riid, ref ppv);
+
+            Console.WriteLine(" {" + rclsid.ToString() + "} {" + riid.ToString() + "} " + result.ToString("x"));
 	
-	return result;
+            return result;
+        }
+    }
 }
 ```
 
-That's all. Build your assembly *myplugin.dll*, and run it with *detoursnetruntime.exe*.
+That's all. Build your assembly *myplugin.dll*, and run it with *DetoursNetRuntime.exe*.
 
 ```bat
-.\detoursNetRuntime myplugin.dll c:\windows\notepad.exe
+.\DetoursNetRuntime myplugin.dll c:\windows\notepad.exe
 ```
 
 ## How does it works ?
 
 ### DetoursNetRuntime
 
-*detours.net* is based on detours project from Microsoft, which is mostly use in API hooking. It create a process in suspended mode, and then rewrite the IAT to insert a new dll at first place. This implies that *Dllmain* of this dll will be execute first before all other code in your application. That's was be done by *detoursNetRuntime.exe*, but inject a special DLL called *detoursNetCLR.dll* described in next chapter.
+*detours.net* is based on detours project from Microsoft, which is mostly used for API hooking. It create a process in suspended mode, and then rewrite the Import Address Table (IAT) to insert a new module at first place. This implies that *Dllmain* of this module will be executed first before all other code in your application. That's was be done by *DetoursNetRuntime.exe*, but inject a special DLL called *DetoursNetCLR.dll* described in next chapter.
 
 ### DetoursNetCLR
 
-DetoursNetCLR.dll is in charge to load CLR and the DetoursNet.dll assembly in current process. To do that we use CLR hosting from COM Component. But this forbidden from *DllMain* because of *loader lock*. To work around this issue, we use *Detours* from microsoft to hook entry point of target process, and load CLR into new *main* function.
+DetoursNetCLR.dll is in charge to load CLR and the *DetoursNet.dll* assembly in current process. To do that we use CLR hosting with COM Component. But it's forbidden to init CLR from *DllMain* because of *loader lock*. *Loader Lock* is a special lock used to protect module list during process loading. To work around this issue, we used original *Detours* to hook entry point of target process, and load CLR into new *main* function.
 
 ### DetoursNet
+
+*DetoursNet.dll* which have two main roles. On one side is used by plugin developper to use attributes, and retrieve original address of target method. In other side is used by runtime to load assembly and find which method to hook.
