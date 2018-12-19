@@ -12,6 +12,8 @@ set(DETOURSNETRUNTIME_SRC
 	src/DetoursNetRuntime.cpp
 )
 
+add_compile_definitions(UNICODE)
+
 add_executable(DetoursNetRuntime ${DETOURSNETRUNTIME_SRC} ${DETOURSNETRUNTIME_INC})
 add_dependencies(DetoursNetRuntime DetoursNetCLR)
 add_dependencies(DetoursNetRuntime DetoursNet)

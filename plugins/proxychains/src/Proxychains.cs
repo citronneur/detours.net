@@ -25,6 +25,9 @@ namespace Proxychains
             private Int64 Zero;
         }
 
+        [DllImport("ws2_32.dll")]
+        public static extern int send(IntPtr Socket, IntPtr buff, int len, int flags);
+
         /// <summary>
         /// Delegate of connect function from WS2_32.dll
         /// </summary>
@@ -32,7 +35,7 @@ namespace Proxychains
         /// <param name="name">struct dest connection infos</param>
         /// <param name="namelen">sizeof name</param>
         /// <returns></returns>
-        public delegate int ConnectDelegate(int s, ref sockaddr_in name, int namelen);
+        public delegate int ConnectDelegate(IntPtr s, ref sockaddr_in name, int namelen);
 
         /// <summary>
         /// Hook of native connect function from WS2_32.dll
@@ -42,11 +45,33 @@ namespace Proxychains
         /// <param name="namelen">sizeof name</param>
         /// <returns></returns>
         [Detours("WS2_32.dll", typeof(ConnectDelegate))]
-        public static int connect(int s, ref sockaddr_in name, int namelen)
+        public static int connect(IntPtr s, ref sockaddr_in name, int namelen)
         {
-            Console.WriteLine("connect hooked !!!! family: "+name.sin_family+" port:" + name.sin_port);
+            Console.WriteLine("connect hooked !!!! family: " + name.sin_addr.s_b1 + "." + name.sin_addr.s_b2 + "." + name.sin_addr.s_b3 + "." + name.sin_addr.s_b4 + " port:" + (UInt16)(name.sin_port << 8 | name.sin_port >> 8));
+            var connectCallback = (ConnectDelegate)(DelegateStore.GetReal(MethodInfo.GetCurrentMethod()));
 
-            return ((ConnectDelegate)(DelegateStore.GetReal(MethodInfo.GetCurrentMethod())))(s, ref name, namelen);
+            var socks = new sockaddr_in()
+            {
+                sin_addr = new in_addr()
+                {
+                    s_b1 = 192,
+                    s_b2 = 168,
+                    s_b3 = 0,
+                    s_b4 = 11
+                },
+                sin_port = (UInt16)((9050 << 8 & 0xFF00) | (9050 >> 8 & 0xFF)),
+                sin_family = name.sin_family
+            };
+
+            var result = connectCallback(s, ref socks, namelen);
+            if(result != 0)
+            {
+                return result;
+            }
+
+            //send(s, )
+
+            return 0;
         }
     }
 }

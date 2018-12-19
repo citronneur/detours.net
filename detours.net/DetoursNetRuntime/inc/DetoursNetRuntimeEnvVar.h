@@ -21,16 +21,16 @@ namespace detoursnetruntime
 		///
 		virtual ~EnvVar();
 
-		void parseFromString(const std::string& allVar);
+		void parseFromString(const std::wstring& allVar);
 		void loadFromAPI();
-		void add(const std::string& name, const std::string& value);
-		void update(const std::string& name, const std::string& value);
-		std::string data() const;
+		void add(const std::wstring& name, const std::wstring& value);
+		void update(const std::wstring& name, const std::wstring& value);
+		std::wstring data() const;
 
 	private:
 		///
 		///	@brief	all var lines
 		///
-		std::vector<std::string> mEnVarLines;
+		std::vector<std::wstring> mEnVarLines;
 	};
 }
