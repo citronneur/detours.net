@@ -3,6 +3,7 @@
 #include "DetoursDll.h"
 #include <metahost.h>
 #include "../inc/DetoursNetCLRPInvokeCache.h"
+#include "../inc/DetoursNetCLRError.h"
 
 namespace {
 	/*!
@@ -56,7 +57,7 @@ namespace {
 		wchar_t sDetoursNetPath[MAX_PATH];
 		DWORD szPath = GetModuleFileName(GetModuleHandle(TEXT("DetoursNetCLR.dll")), sDetoursNetPath, MAX_PATH);
 		if (szPath == 0) {
-			return -1;
+			return ERROR_BAD_MODULE_PATH;
 		}
 		memcpy(sDetoursNetPath + szPath - 7, TEXT(".dll"), 10);
 
@@ -65,27 +66,27 @@ namespace {
 		// build meta host
 		ICLRMetaHost *pMetaHost = NULL;
 		if (FAILED(CLRCreateInstance(CLSID_CLRMetaHost, IID_PPV_ARGS(&pMetaHost)))) {
-			return -1;
+			return ERROR_CANNOT_CREATE_CLR_INSTANCE;
 		}
 
 		// Load runtime
 		ICLRRuntimeInfo *pRuntimeInfo = NULL;
 		if (FAILED(pMetaHost->GetRuntime(L"v4.0.30319", IID_PPV_ARGS(&pRuntimeInfo)))) {
-			return -1;
+			return ERROR_CANNOT_GET_RUNTIME_V4;
 		}
 
 		BOOL isLoadable = FALSE;
 		if (FAILED(pRuntimeInfo->IsLoadable(&isLoadable)) || !isLoadable) {
-			return -1;
+			return ERROR_CLR_NOT_LOADABLE;
 		}
 
 		if (FAILED(pRuntimeInfo->GetInterface(CLSID_CLRRuntimeHost, IID_PPV_ARGS(&pClrRuntimeHost)))) {
-			return -1;
+			return ERROR_FAILED_TO_LOAD_INTERFACE;
 		}
 
 		// start runtime
 		if (FAILED(pClrRuntimeHost->Start())) {
-			return -1;
+			return ERROR_FAILED_TO_START_CLR;
 		}
 
 		// patch iat to handle pinvoke from mscorlib
@@ -98,8 +99,9 @@ namespace {
 			L"DetoursNet.Loader",
 			L"Start",
 			L"",
-			&pReturnValue))) {
-			return -1;
+			&pReturnValue))) 
+		{
+			return ERROR_FAILED_TO_LOAD_DETOURSNET_ASSEMBLY;
 		}
 
 		// free resources
