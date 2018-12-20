@@ -55,6 +55,8 @@ That's all. Build your assembly *myplugin.dll*, and run it with *DetoursNetRunti
 
 DetoursNetCLR.dll is in charge to load CLR and the *DetoursNet.dll* assembly in current process. To do that we use CLR hosting with COM Component. But it's forbidden to init CLR from *DllMain* because of *loader lock*. *Loader Lock* is a special lock used to protect module list during process loading. To work around this issue, we used original *Detours* to hook entry point of target process, and load CLR into new *main* function.
 
+To sandbox CLR, to avoid some infinite loop in calling target function, we used IAT unhooking on clr.dll module. But in most of case CLR use *pinvoke* to call native in API, mostly in mscorlib. *pinvoke* use internally *GetProcAddress* function to resolve API. We hook this API only for clr.dll through IAT, and cached real function pointer when clr call this API.
+
 ### DetoursNet
 
 *DetoursNet.dll* which have two main roles. On one side is used by plugin developper to use attributes, and retrieve original address of target method. In other side is used by runtime to load assembly and find which method to hook.
