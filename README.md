@@ -45,7 +45,20 @@ That's all. Build your assembly *myplugin.dll*, and run it with *DetoursNetRunti
 .\DetoursNetRuntime myplugin.dll c:\windows\notepad.exe
 ```
 
+## How to build it ?
+
+Create an empty directory near *detours.net* project directory and just launch cmake like this :
+
+```
+git clone https://github.com/citronneur/detours.net
+mkdir build
+cd build
+cmake -G "Visual Studio 15 2017 Win64" ..\detours.net
+```
+
 ## How does it works ?
+
+*detours.net* is splitted into three part :
 
 ### DetoursNetRuntime
 
@@ -59,4 +72,4 @@ To sandbox CLR, to avoid some infinite loop in calling target function, we used 
 
 ### DetoursNet
 
-*DetoursNet.dll* which have two main roles. On one side is used by plugin developper to use attributes, and retrieve original address of target method. In other side is used by runtime to load assembly and find which method to hook.
+*DetoursNet.dll* which have two main roles. On one side is used by plugin developper, firstly to use attributes to indicate all function hook, secondly to retrieve real address of hooked method. In other side is used by runtime to load plugin assembly and find all method to hook, thanks to attributes provided by plugin developper.
