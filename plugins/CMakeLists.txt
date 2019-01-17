@@ -1,5 +1,5 @@
 # Tree processing
 
-add_subdirectory(proxychains)
+add_subdirectory(proxysocks)
 add_subdirectory(procmon)
 
