@@ -60,16 +60,16 @@ cmake -G "Visual Studio 15 2017 Win64" ..\detours.net
 
 *detours.net* is splitted into three part :
 
-### DetoursNetRuntime
+### DetoursNetRuntime.exe
 
-*detours.net* is based on detours project from Microsoft, which is mostly used for API hooking. It create a process in suspended mode, and then rewrite the Import Address Table (IAT) to insert a new module at first place. This implies that *Dllmain* of this module will be executed first before all other code in your application. That's was be done by *DetoursNetRuntime.exe*, but inject a special DLL called *DetoursNetCLR.dll* described in next chapter.
+*detours.net* is based on detours project from Microsoft, which is mostly used for API hooking. It create a process in suspended mode, and then rewrite the Import Address Table (IAT) to insert a new module at first place. This implies that *Dllmain* of this module will be executed first before all other code in your application. That's was be done by *DetoursNetRuntime.exe*, which could be view as a launcher of your targeted program then inject a special DLL called *DetoursNetCLR.dll* described in next chapter.
 
-### DetoursNetCLR
+### DetoursNetCLR.dll
 
-DetoursNetCLR.dll is in charge to load CLR and the *DetoursNet.dll* assembly in current process. To do that we use CLR hosting with COM Component. But it's forbidden to init CLR from *DllMain* because of *loader lock*. *Loader Lock* is a special lock used to protect module list during process loading. To work around this issue, we used original *Detours* to hook entry point of target process, and load CLR into new *main* function.
+DetoursNetCLR.dll is in charge to load CLR (Common Language Runtime) and the *DetoursNet.dll* assembly in current process. To do that we use CLR hosting through COM. As we seen in last chapter, the DllMain function of *DetoursNetCLR.dll* will be the fisrt code run in your target process. But it's forbidden to init CLR from *DllMain* because of *Loader lock*. *Loader Lock* is a special lock used by the loader to protect module list during process loading. To work around this issue, we used original *Detours* library to hook entry point of target process, and load CLR into new *main* function.
 
-To sandbox CLR, to avoid some infinite loop in calling target function, we used IAT unhooking on clr.dll module. But in most of case CLR use *pinvoke* to call native in API, mostly in mscorlib. *pinvoke* use internally *GetProcAddress* function to resolve API. We hook this API only for clr.dll through IAT, and cached real function pointer when clr call this API.
+To sandbox CLR, and avoid some infinite loop in calling target function, we used IAT (un)hooking on *clr.dll* module. First of all, we cache real functions pointer, then, we hook *GetProcAddress* function. In most case, CLR use *pinvoke* to call native API, mostly in mscorlib. *pinvoke* use internally *GetProcAddress* function to resolve API. When CLR call *GetProcAddress* to retrieve native API, we check if it's a hooked function, and if it's true, we return real pointer.
 
-### DetoursNet
+### DetoursNet.dll
 
 *DetoursNet.dll* which have two main roles. On one side is used by plugin developper, firstly to use attributes to indicate all function hook, secondly to retrieve real address of hooked method. In other side is used by runtime to load plugin assembly and find all method to hook, thanks to attributes provided by plugin developper.
