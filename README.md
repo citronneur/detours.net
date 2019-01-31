@@ -5,8 +5,6 @@ Détours.net use CLR as hooking engine. It's based on [Detours](https://github.c
 
 ## How to build it ?
 
-Create an empty directory near *detours.net* project directory and just launch cmake like this :
-
 ```
 git clone https://github.com/citronneur/detours.net
 mkdir build
@@ -84,7 +82,7 @@ To sandbox CLR, and avoid some infinite loop in calling target function, we used
 
 Plugins are hooking dll use for a particular purpose, and provided by community. All plugins are available under *plugin* directory:
 
-* procmon a lot of windaows native API
-* proxysoks convert any windows application using socket to pass through a proxy socks
+* procmon log a lot of windows native API
+* proxysocks convert any windows application using socket to pass through a proxy socks
 
 
