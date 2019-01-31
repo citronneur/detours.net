@@ -3,10 +3,27 @@ Détours.net use CLR as hooking engine. It's based on [Detours](https://github.c
 
 *detours.net* is as simple to use as *DllImport* attribute.
 
-## Generate a plugin
+## How to build it ?
 
-Imagine you want to log all GUID of COM object used by a an application.
-First step is to generate a plugin. Plugin is a simple .net Assembly linked with *detoursnet.dll*.
+Create an empty directory near *detours.net* project directory and just launch cmake like this :
+
+```
+git clone https://github.com/citronneur/detours.net
+mkdir build
+cd build
+cmake -G "Visual Studio 15 2017 Win64" ..\detours.net
+```
+
+Build solution with Visual Studio. This will produce four main executables:
+* DetoursNetRuntime.exe which is the launcher
+* DetoursNetCLR.dll which is the loader
+* DetoursNet.dll which is the interface
+* DetoursDll.dll which is the hooker
+
+## How to hook anything native to managed ?
+
+In this exemple, we want to log all GUID of COM object used by a an application using powerfull .Net API for console application.
+To do it we create a C# DLL project with visual studio, linked with *DetoursNet.dll* assembly, named *myplugin*.
 
 Then you have to tell *detours.net* where is original method and how to call it. You just have to declare a delegate which match your target method signature, and declare your associate hook like this :
 
@@ -45,17 +62,6 @@ That's all. Build your assembly *myplugin.dll*, and run it with *DetoursNetRunti
 .\DetoursNetRuntime myplugin.dll c:\windows\notepad.exe
 ```
 
-## How to build it ?
-
-Create an empty directory near *detours.net* project directory and just launch cmake like this :
-
-```
-git clone https://github.com/citronneur/detours.net
-mkdir build
-cd build
-cmake -G "Visual Studio 15 2017 Win64" ..\detours.net
-```
-
 ## How does it works ?
 
 *detours.net* is splitted into three part :
@@ -73,3 +79,12 @@ To sandbox CLR, and avoid some infinite loop in calling target function, we used
 ### DetoursNet.dll
 
 *DetoursNet.dll* which have two main roles. On one side is used by plugin developper, firstly to use attributes to indicate all function hook, secondly to retrieve real address of hooked method. In other side is used by runtime to load plugin assembly and find all method to hook, thanks to attributes provided by plugin developper.
+
+## Plugins
+
+Plugins are hooking dll use for a particular purpose, and provided by community. All plugins are available under *plugin* directory:
+
+* procmon a lot of windaows native API
+* proxysoks convert any windows application using socket to pass through a proxy socks
+
+
