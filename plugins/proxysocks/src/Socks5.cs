@@ -56,6 +56,7 @@ namespace proxysocks
             public ushort port;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         private struct IPv4ConnectResponse
         {
             public byte version;
