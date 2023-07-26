@@ -4,6 +4,7 @@ include(${CMAKE_ROOT}/Modules/ExternalProject.cmake)
 ExternalProject_Add(
 	Detours_project
 	GIT_REPOSITORY "https://github.com/Microsoft/Detours.git"
+	GIT_TAG "main"
 	CONFIGURE_COMMAND ""
 	BINARY_DIR	"${CMAKE_CURRENT_BINARY_DIR}/Detours_project-prefix/src/Detours_project/src"
 	BUILD_COMMAND ${CMAKE_COMMAND} -E env DETOURS_TARGET_PROCESSOR=X64 nmake
