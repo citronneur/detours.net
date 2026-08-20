@@ -9,7 +9,7 @@ Détours.net use CLR as hooking engine. It's based on [Detours](https://github.c
 git clone https://github.com/citronneur/detours.net
 mkdir build
 cd build
-cmake -G "Visual Studio 15 2017 Win64" ..\detours.net
+cmake -G "Visual Studio 17 2022" -A x64 ..\detours.net
 ```
 
 Build solution with Visual Studio. This will produce four main executables:

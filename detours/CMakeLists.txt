@@ -7,13 +7,13 @@ ExternalProject_Add(
 	GIT_TAG "main"
 	CONFIGURE_COMMAND ""
 	BINARY_DIR	"${CMAKE_CURRENT_BINARY_DIR}/Detours_project-prefix/src/Detours_project/src"
-	BUILD_COMMAND ${CMAKE_COMMAND} -E env DETOURS_TARGET_PROCESSOR=X64 nmake
+	BUILD_COMMAND ${CMAKE_COMMAND} -E env DETOURS_TARGET_PROCESSOR=X86 nmake
 	INSTALL_COMMAND ""
 	UPDATE_COMMAND ""
 )
 
 set(DETOURS_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/Detours_project-prefix/src/Detours_project/include)
-set(DETOURS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/Detours_project-prefix/src/Detours_project/lib.X64/)
+set(DETOURS_LIB_DIR ${CMAKE_CURRENT_BINARY_DIR}/Detours_project-prefix/src/Detours_project/lib.X86/)
 
 # use to fix target_include directories
 file(MAKE_DIRECTORY ${DETOURS_INCLUDE_DIR})

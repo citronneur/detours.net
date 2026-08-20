@@ -6,7 +6,7 @@ typedef struct _DetoursUnsandboxContext {
 	PVOID pReal;
 } DetoursUnsandboxContext;
 
-static BOOL Unsandbox(_In_opt_ PVOID pContext, _In_ DWORD nOrdinal, _In_opt_ LPCSTR pszFunc, _In_opt_ PVOID* ppvFunc)
+static BOOL CALLBACK Unsandbox(_In_opt_ PVOID pContext, _In_ DWORD nOrdinal, _In_opt_ LPCSTR pszFunc, _In_opt_ PVOID* ppvFunc)
 {
 	DetoursUnsandboxContext* context = reinterpret_cast<DetoursUnsandboxContext*>(pContext);
 	if (ppvFunc != nullptr && *ppvFunc == context->pImport)

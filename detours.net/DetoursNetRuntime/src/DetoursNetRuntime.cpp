@@ -57,7 +57,7 @@ int wmain(int argc, wchar_t** argv)
 			NULL)
 		)
 	{
-		std::cerr << "[!] cannot create process" << std::endl;
+		std::cerr << "[!] cannot create process (error " << GetLastError() << ")" << std::endl;
 		return 1;
 	}
 	ResumeThread(processInfo.hThread);
