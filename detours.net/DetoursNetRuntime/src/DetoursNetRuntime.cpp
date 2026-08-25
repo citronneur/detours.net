@@ -42,7 +42,7 @@ int wmain(int argc, wchar_t** argv)
 	PROCESS_INFORMATION processInfo;
 	STARTUPINFO startupInfo = { 0 };
 	startupInfo.cb = sizeof(startupInfo);
-	if (!DetourCreateProcessWithDll(
+	if (!DetourCreateProcessWithDllEx(
 			NULL,
 			const_cast<wchar_t*>(commandLine.c_str()),
 			NULL, 
